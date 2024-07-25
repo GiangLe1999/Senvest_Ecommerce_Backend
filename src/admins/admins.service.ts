@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Admin, AdminDocument } from 'src/schemas/admin.schema';
+import { Admin, AdminDocument } from '../schemas/admin.schema';
 import { AdminLoginInput, AdminLoginOutput } from './dtos/admin-login.dto';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -8,7 +8,7 @@ import {
   AdminRegisterInput,
   AdminRegisterOutput,
 } from './dtos/admin-register.dto';
-import { AuthService } from 'src/auth/auth.service';
+import { AuthService } from '../auth/auth.service';
 import { AdminRefreshTokenOutput } from './dtos/admin-refresh-token';
 
 @Injectable()

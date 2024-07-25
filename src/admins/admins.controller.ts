@@ -11,9 +11,9 @@ import { Response } from 'express';
 import { AdminsService } from './admins.service';
 import { AdminLoginInput } from './dtos/admin-login.dto';
 import { AdminRegisterInput } from './dtos/admin-register.dto';
-import { AuthAdmin } from 'src/auth/admin/auth-admin.decorator';
-import { AdminDocument } from 'src/schemas/admin.schema';
-import { AuthAdminGuard } from 'src/auth/admin/auth-admin.guard';
+import { AuthAdmin } from '../auth/admin/auth-admin.decorator';
+import { AdminDocument } from '../schemas/admin.schema';
+import { AuthAdminGuard } from '../auth/admin/auth-admin.guard';
 
 @Controller('admins')
 export class AdminsController {
