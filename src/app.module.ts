@@ -1,0 +1,48 @@
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { AdminsModule } from './admins/admins.module';
+import { AuthModule } from './auth/auth.module';
+import * as Joi from 'joi';
+import { AuthAdminMiddleware } from './auth/admin/auth-admin.middleware';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.ENV === 'dev' ? '.env.dev' : '.env.test',
+      ignoreEnvFile: process.env.ENV === 'prod',
+      validationSchema: Joi.object({
+        ENV: Joi.string().valid('dev', 'prod'),
+        MONGODB_URI: Joi.string().required(),
+        APP_FRONTEND_URL: Joi.string().required(),
+        PORT: Joi.string().required(),
+        ACCESS_TOKEN_KEY: Joi.string().required(),
+        SECRET_TOKEN_KEY: Joi.string().required(),
+        ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
+      }),
+    }),
+    MongooseModule.forRoot(process.env.MONGODB_URI),
+    AdminsModule,
+    AuthModule.forRoot({
+      accessTokenKey: process.env.ACCESS_TOKEN_KEY,
+      secretTokenKey: process.env.SECRET_TOKEN_KEY,
+    }),
+  ],
+  controllers: [AppController],
+  providers: [AppService],
+})
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(AuthAdminMiddleware)
+      .forRoutes({ path: '/admins/*', method: RequestMethod.ALL });
+  }
+}
