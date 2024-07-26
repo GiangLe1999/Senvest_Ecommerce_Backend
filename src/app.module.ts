@@ -12,6 +12,8 @@ import { AdminsModule } from './admins/admins.module';
 import { AuthModule } from './auth/auth.module';
 import * as Joi from 'joi';
 import { AuthAdminMiddleware } from './auth/admin/auth-admin.middleware';
+import { AdminCategoriesModule } from './admin-categories/admin-categories.module';
+import { CloudinaryModule } from './cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -27,6 +29,10 @@ import { AuthAdminMiddleware } from './auth/admin/auth-admin.middleware';
         ACCESS_TOKEN_KEY: Joi.string().required(),
         SECRET_TOKEN_KEY: Joi.string().required(),
         ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
+        CLOUDINARY_CLOUD_NAME: Joi.string().required(),
+        CLOUDINARY_API_KEY: Joi.string().required(),
+        CLOUDINARY_API_SECRET: Joi.string().required(),
+        CLOUDINARY_FOLDER: Joi.string().required(),
       }),
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
@@ -35,6 +41,8 @@ import { AuthAdminMiddleware } from './auth/admin/auth-admin.middleware';
       accessTokenKey: process.env.ACCESS_TOKEN_KEY,
       secretTokenKey: process.env.SECRET_TOKEN_KEY,
     }),
+    AdminCategoriesModule,
+    CloudinaryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

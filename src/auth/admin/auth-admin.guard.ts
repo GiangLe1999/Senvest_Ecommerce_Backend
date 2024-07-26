@@ -7,7 +7,7 @@ export class AuthAdminGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // Assuming user is attached to the request by authentication middleware
-    return !!user; // Return true if user exists, false otherwise
+    const admin = request.admin;
+    return !!admin;
   }
 }
