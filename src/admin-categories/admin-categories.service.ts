@@ -8,6 +8,7 @@ import {
   CreateCategoryOutput,
 } from './dtos/create-category.dto';
 import slugify from 'slugify';
+// import { GetCategoriesOutput } from 'src/categories/dtos/get-categories.dto';
 
 @Injectable()
 export class AdminCategoriesService {
@@ -15,6 +16,14 @@ export class AdminCategoriesService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  // async getCategories(): Promise<GetCategoriesOutput> {
+  //   try {
+
+  //   } catch (error) {
+
+  //   }
+  // }
 
   async createCategory(
     createCategoryInput: CreateCategoryInput & { image: Express.Multer.File },
