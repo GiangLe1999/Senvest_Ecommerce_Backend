@@ -141,57 +141,39 @@ export class AdminCategoriesService {
         };
       }
 
-      if (updateCategoryInput?.name?.en) {
+      if (updateCategoryInput?.name) {
         updateObj = {
           ...updateObj,
           name: {
-            en: updateCategoryInput.name.en,
+            vi: updateCategoryInput?.name?.vi || oldCategory.name.vi,
+            en: updateCategoryInput?.name?.en || oldCategory.name.en,
           },
           slug: {
-            en: slugify(updateCategoryInput.name.en, {
-              lower: true,
-              trim: true,
-              strict: true,
-            }),
-          },
-        };
-      }
-
-      if (updateCategoryInput?.name?.vi) {
-        updateObj = {
-          ...updateObj,
-          name: {
-            ...updateObj?.name,
-            vi: updateCategoryInput.name.vi,
-          },
-          slug: {
-            ...updateObj?.slug,
-            vi: slugify(updateCategoryInput.name.vi, {
+            vi: slugify(updateCategoryInput?.name?.vi || oldCategory.name.vi, {
               lower: true,
               locale: 'vi',
               trim: true,
               strict: true,
             }),
+            en: slugify(updateCategoryInput?.name?.en || oldCategory.name.en, {
+              lower: true,
+              trim: true,
+              strict: true,
+            }),
           },
         };
       }
 
-      if (updateCategoryInput?.description?.vi) {
+      if (updateCategoryInput?.description) {
         updateObj = {
           ...updateObj,
           description: {
-            ...updateObj?.description,
-            vi: updateCategoryInput.description.vi,
-          },
-        };
-      }
-
-      if (updateCategoryInput?.description?.en) {
-        updateObj = {
-          ...updateObj,
-          description: {
-            ...updateObj?.description,
-            en: updateCategoryInput.description.en,
+            en:
+              updateCategoryInput?.description?.en ||
+              oldCategory.description.en,
+            vi:
+              updateCategoryInput?.description?.vi ||
+              oldCategory.description.vi,
           },
         };
       }
