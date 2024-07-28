@@ -15,7 +15,7 @@ export class Category {
   @Type(() => LocalizedString)
   name: LocalizedString;
 
-  @Prop({ type: LocalizedStringSchema, required: true })
+  @Prop({ type: LocalizedStringSchema, required: true, unique: true })
   @Type(() => LocalizedString)
   slug: LocalizedString;
 
@@ -27,8 +27,8 @@ export class Category {
   @IsOptional()
   image: string;
 
-  @Prop({ default: 'Published', enum: ['Published', 'Scheduled', 'Inactive'] })
-  @IsEnum(['Published', 'Scheduled', 'Inactive'])
+  @Prop({ default: 'Published', enum: ['Published', 'Inactive'] })
+  @IsEnum(['Published', 'Inactive'])
   status: string;
 
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Product' }], default: [] })

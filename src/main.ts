@@ -16,13 +16,13 @@ async function bootstrap() {
     }),
   );
 
-  // const allowedDomain = configService.get<string>('APP_FRONTEND_URL');
+  const allowedDomain = configService.get<string>('APP_FRONTEND_URL');
 
-  // app.enableCors({
-  //   origin: [allowedDomain],
-  //   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  //   credentials: true,
-  // });
+  app.enableCors({
+    origin: [allowedDomain, 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    credentials: true,
+  });
 
   const PORT = configService.get<number>('PORT');
 

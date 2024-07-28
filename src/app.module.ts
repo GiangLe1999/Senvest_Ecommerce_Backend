@@ -14,6 +14,8 @@ import * as Joi from 'joi';
 import { AuthAdminMiddleware } from './auth/admin/auth-admin.middleware';
 import { AdminCategoriesModule } from './admin-categories/admin-categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
+import { AdminProductsModule } from './admin-products/admin-products.module';
+import { CategoriesModule } from './categories/categories.module';
 
 @Module({
   imports: [
@@ -43,6 +45,8 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
     }),
     AdminCategoriesModule,
     CloudinaryModule,
+    AdminProductsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

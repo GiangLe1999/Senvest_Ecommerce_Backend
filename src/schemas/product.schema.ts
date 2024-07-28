@@ -28,15 +28,18 @@ export class Variant {
 
 export const VariantSchema = SchemaFactory.createForClass(Variant);
 
+// HydratedDocument<Product> is a Mongoose utility type that combines the document type (Product) with Mongoose's built-in document methods
+// and properties (such as save(), toObject(), etc.).
 export type ProductDocument = HydratedDocument<Product>;
 
+// The @Schema decorator indicates that this class is a Mongoose schema.
 @Schema({ timestamps: true })
 export class Product {
   @Prop({ type: LocalizedStringSchema, required: true })
   @Type(() => LocalizedString)
   name: LocalizedString;
 
-  @Prop({ type: LocalizedStringSchema, required: true })
+  @Prop({ type: LocalizedStringSchema, required: true, unique: true })
   @Type(() => LocalizedString)
   slug: LocalizedString;
 
@@ -45,7 +48,7 @@ export class Product {
   description: LocalizedString;
 
   @Prop({ type: [String], required: true })
-  images: string[];
+  images: { type: string[]; required: true };
 
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
   category: Types.ObjectId;
@@ -60,9 +63,11 @@ export class Product {
   @Prop({ default: 0 })
   totalQuantitySold: number;
 
-  @Prop({ default: 'Published', enum: ['Published', 'Scheduled', 'Inactive'] })
-  @IsEnum(['Published', 'Scheduled', 'Inactive'])
+  @Prop({ default: 'Published', enum: ['Published', 'Inactive'] })
+  @IsEnum(['Published', 'Inactive'])
   status: string;
 }
 
+// This is the actual Mongoose schema created by calling SchemaFactory.createForClass(Product).
+// ProductSchema is used by Mongoose to define the schema for the Product collection in MongoDB.
 export const ProductSchema = SchemaFactory.createForClass(Product);

@@ -17,7 +17,7 @@ export class CreateCategoryInput {
 
   // Optional: if you want to validate other fields
   @IsString()
-  status: 'Published' | 'Iinactive' | 'Scheduled';
+  status: 'Published' | 'Inactive' | 'Scheduled';
 }
 
 export class CreateCategoryOutput extends CoreOutput {

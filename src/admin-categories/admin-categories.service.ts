@@ -6,7 +6,7 @@ import { Category, CategoryDocument } from 'src/schemas/category.schema';
 import {
   CreateCategoryInput,
   CreateCategoryOutput,
-} from './dto/create-category.dto';
+} from './dtos/create-category.dto';
 import slugify from 'slugify';
 
 @Injectable()
