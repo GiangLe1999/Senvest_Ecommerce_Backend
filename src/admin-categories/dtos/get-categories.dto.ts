@@ -1,4 +1,4 @@
-import { LocalizedString } from 'src/common/schemas/localized-string.schema';
+import { LocalizedString } from '../../common/schemas/localized-string.schema';
 import { CoreOutput } from '../../common/dtos/output.dto';
 import { IsOptional } from 'class-validator';
 
