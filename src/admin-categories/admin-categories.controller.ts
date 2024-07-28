@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   NotFoundException,
+  Param,
   Post,
   Put,
   Res,
@@ -75,6 +77,24 @@ export class AdminCategoriesController {
           image: file,
         }),
       );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Delete('delete/:id')
+  @UseGuards(AuthAdminGuard)
+  async deleteCategory(@Res() res: Response, @Param('id') id: string) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.adminCategoriesService.deleteCategory(id));
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());

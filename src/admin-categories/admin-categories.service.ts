@@ -14,6 +14,7 @@ import {
 import slugify from 'slugify';
 import { GetCategoriesOutput } from './dtos/get-categories.dto';
 import { UpdateCategoryInput } from './dtos/update-category.dto';
+import { CoreOutput } from '../common/dtos/output.dto';
 
 @Injectable()
 export class AdminCategoriesService {
@@ -21,6 +22,10 @@ export class AdminCategoriesService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  async findCategoryById(_id: string): Promise<CategoryDocument> {
+    return this.categoryModel.findById(_id);
+  }
 
   async getCategories(): Promise<GetCategoriesOutput> {
     try {
@@ -109,9 +114,7 @@ export class AdminCategoriesService {
     updateCategoryInput: UpdateCategoryInput & { image: Express.Multer.File },
   ): Promise<CreateCategoryOutput> {
     try {
-      const oldCategory = await this.categoryModel.findById(
-        updateCategoryInput._id,
-      );
+      const oldCategory = await this.findCategoryById(updateCategoryInput._id);
 
       if (!oldCategory) {
         throw new NotFoundException({
@@ -205,6 +208,35 @@ export class AdminCategoriesService {
       };
     } catch (error) {
       console.log(error);
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async deleteCategory(_id: string): Promise<CoreOutput> {
+    try {
+      const category = await this.findCategoryById(_id);
+
+      if (!category) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Category does not exist',
+        });
+      }
+
+      if (category?.image) {
+        await this.cloudinaryService.deleteImage(
+          this.cloudinaryService.extractPublicId(category.image),
+        );
+      }
+
+      await this.categoryModel.findByIdAndDelete(_id);
+      return {
+        ok: true,
+      };
+    } catch (error) {
       throw new InternalServerErrorException({
         ok: false,
         error: error.message,
