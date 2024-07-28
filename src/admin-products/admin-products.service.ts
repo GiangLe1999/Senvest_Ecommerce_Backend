@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
@@ -9,6 +14,8 @@ import {
 } from './dtos/create-product.dto';
 import { Category, CategoryDocument } from '../schemas/category.schema';
 import slugify from 'slugify';
+import { GetProductsOutput } from './dtos/get-products.dto';
+import { CoreOutput } from 'src/common/dtos/output.dto';
 
 @Injectable()
 export class AdminProductsService {
@@ -17,6 +24,31 @@ export class AdminProductsService {
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
+
+  async findProductById(id: string): Promise<ProductDocument> {
+    const product = await this.productModel.findById(id);
+
+    return product;
+  }
+
+  async getProducts(): Promise<GetProductsOutput> {
+    try {
+      const products = await this.productModel.find().populate({
+        path: 'category',
+        model: 'Category',
+        select: 'name image',
+      });
+      return {
+        ok: true,
+        products,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
+  }
 
   async createProduct(
     createProductInput: CreateProductInput & { images: Express.Multer.File[] },
@@ -71,6 +103,44 @@ export class AdminProductsService {
         ok: true,
         product: newProduct,
       };
-    } catch (error) {}
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async deleteProduct(_id: string): Promise<CoreOutput> {
+    try {
+      const product = await this.findProductById(_id);
+
+      if (!product) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Product does not exist',
+        });
+      }
+
+      await this.cloudinaryService.deleteImages(product.images as any);
+
+      const category = await this.categoryModel.findById(product.category);
+      if (category) {
+        category.products = category.products.filter(
+          (product) => product.toString() !== _id,
+        );
+        await category.save();
+      }
+
+      await this.productModel.findByIdAndDelete(_id);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
   }
 }

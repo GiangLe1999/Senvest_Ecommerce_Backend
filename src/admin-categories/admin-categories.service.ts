@@ -127,9 +127,7 @@ export class AdminCategoriesService {
 
       if (updateCategoryInput?.image) {
         if (oldCategory?.image) {
-          await this.cloudinaryService.deleteImage(
-            this.cloudinaryService.extractPublicId(oldCategory.image),
-          );
+          await this.cloudinaryService.deleteImage(oldCategory.image);
         }
 
         const uploadResult = await this.cloudinaryService.uploadImage(
@@ -178,6 +176,13 @@ export class AdminCategoriesService {
         };
       }
 
+      if (updateCategoryInput?.status) {
+        updateObj = {
+          ...updateObj,
+          status: updateCategoryInput?.status || oldCategory.status,
+        };
+      }
+
       const newCategory = await this.categoryModel.findByIdAndUpdate(
         updateCategoryInput._id,
         updateObj,
@@ -209,9 +214,7 @@ export class AdminCategoriesService {
       }
 
       if (category?.image) {
-        await this.cloudinaryService.deleteImage(
-          this.cloudinaryService.extractPublicId(category.image),
-        );
+        await this.cloudinaryService.deleteImage(category.image);
       }
 
       await this.categoryModel.findByIdAndDelete(_id);

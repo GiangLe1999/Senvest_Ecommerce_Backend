@@ -41,8 +41,17 @@ export class CloudinaryService {
     return Promise.all(uploadPromises);
   }
 
-  async deleteImage(publicId: string): Promise<{ result: string }> {
+  extractPublicId(imageUrl: string) {
+    const parts = imageUrl.split('/');
+    const folderName = parts[parts.length - 2];
+    const filename = parts[parts.length - 1];
+    const [publicId] = filename.split('.');
+    return `${folderName}/${publicId}`;
+  }
+
+  async deleteImage(secureUrl: string): Promise<{ result: string }> {
     try {
+      const publicId = this.extractPublicId(secureUrl);
       const result = await cloudinary.uploader.destroy(publicId);
       return result;
     } catch (error) {
@@ -53,11 +62,21 @@ export class CloudinaryService {
     }
   }
 
-  extractPublicId(imageUrl: string) {
-    const parts = imageUrl.split('/');
-    const folderName = parts[parts.length - 2];
-    const filename = parts[parts.length - 1];
-    const [publicId] = filename.split('.');
-    return `${folderName}/${publicId}`;
+  async deleteImages(secureUrls: string[]): Promise<{ result: string }[]> {
+    try {
+      const deletePromises = secureUrls.map(async (secureUrl) => {
+        const publicId = this.extractPublicId(secureUrl);
+        const result = await cloudinary.uploader.destroy(publicId);
+        return result;
+      });
+
+      const results = await Promise.all(deletePromises);
+      return results;
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: 'Xóa ảnh không thành công',
+      });
+    }
   }
 }
