@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { AdminCategoriesController } from './admin-categories.controller';
 import { AdminCategoriesService } from './admin-categories.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Category, CategorySchema } from 'src/schemas/category.schema';
+import { Category, CategorySchema } from '../schemas/category.schema';
 
 @Module({
   imports: [

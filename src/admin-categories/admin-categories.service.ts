@@ -1,8 +1,8 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { Category, CategoryDocument } from 'src/schemas/category.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Category, CategoryDocument } from '../schemas/category.schema';
 import {
   CreateCategoryInput,
   CreateCategoryOutput,

@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AdminProductsController } from './admin-products.controller';
 import { AdminProductsService } from './admin-products.service';
-import { CloudinaryModule } from 'src/cloudinary/cloudinary.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Product, ProductSchema } from 'src/schemas/product.schema';
-import { Category, CategorySchema } from 'src/schemas/category.schema';
+import { Product, ProductSchema } from '../schemas/product.schema';
+import { Category, CategorySchema } from '../schemas/category.schema';
 
 @Module({
   imports: [

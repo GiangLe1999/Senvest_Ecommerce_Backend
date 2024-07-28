@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { Product, ProductDocument } from 'src/schemas/product.schema';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
+import { Product, ProductDocument } from '../schemas/product.schema';
 import {
   CreateProductInput,
   CreateProductOutput,
 } from './dtos/create-product.dto';
-import { Category, CategoryDocument } from 'src/schemas/category.schema';
+import { Category, CategoryDocument } from '../schemas/category.schema';
 import slugify from 'slugify';
 
 @Injectable()

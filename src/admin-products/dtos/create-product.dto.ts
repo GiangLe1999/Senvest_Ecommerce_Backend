@@ -1,8 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { Transform } from 'class-transformer';
 import { IsArray, IsNotEmpty, IsString } from 'class-validator';
-import { CoreOutput } from 'src/common/dtos/output.dto';
-import { Product } from 'src/schemas/product.schema';
+import { CoreOutput } from '../../common/dtos/output.dto';
+import { Product } from '../../schemas/product.schema';
 
 export class CreateProductInput {
   @IsNotEmpty()

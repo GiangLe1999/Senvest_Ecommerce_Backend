@@ -5,7 +5,7 @@ import { HydratedDocument, Types } from 'mongoose';
 import {
   LocalizedString,
   LocalizedStringSchema,
-} from 'src/common/schemas/localized-string.schema';
+} from '../common/schemas/localized-string.schema';
 
 @Schema()
 export class Variant {

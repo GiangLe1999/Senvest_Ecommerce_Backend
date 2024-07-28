@@ -11,7 +11,7 @@ import {
 import { Response } from 'express';
 import { AdminCategoriesService } from './admin-categories.service';
 import { CreateCategoryInput } from './dtos/create-category.dto';
-import { AuthAdminGuard } from 'src/auth/admin/auth-admin.guard';
+import { AuthAdminGuard } from '../auth/admin/auth-admin.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('admins/admin-categories')
