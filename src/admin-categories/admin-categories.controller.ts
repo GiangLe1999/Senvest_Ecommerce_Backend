@@ -1,8 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpStatus,
+  NotFoundException,
   Post,
+  Put,
   Res,
   UploadedFile,
   UseGuards,
@@ -13,12 +16,27 @@ import { AdminCategoriesService } from './admin-categories.service';
 import { CreateCategoryInput } from './dtos/create-category.dto';
 import { AuthAdminGuard } from '../auth/admin/auth-admin.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { UpdateCategoryInput } from './dtos/update-category.dto';
 
 @Controller('admins/admin-categories')
 export class AdminCategoriesController {
   constructor(
     private readonly adminCategoriesService: AdminCategoriesService,
   ) {}
+
+  @Get()
+  @UseGuards(AuthAdminGuard)
+  async getCategories(@Res() res: Response) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.adminCategoriesService.getCategories());
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
 
   @Post('create')
   @UseGuards(AuthAdminGuard)
@@ -36,10 +54,35 @@ export class AdminCategoriesController {
         }),
       );
     } catch (error) {
-      console.log(error);
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Put('update')
+  @UseGuards(AuthAdminGuard)
+  @UseInterceptors(FileInterceptor('file'))
+  async updateCategory(
+    @UploadedFile() file: Express.Multer.File,
+    @Res() res: Response,
+    @Body() updateCategoryInput: UpdateCategoryInput,
+  ) {
+    try {
+      res.status(HttpStatus.OK).json(
+        await this.adminCategoriesService.updateCategory({
+          ...updateCategoryInput,
+          image: file,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
     }
   }
 }

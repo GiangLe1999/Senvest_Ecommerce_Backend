@@ -52,4 +52,12 @@ export class CloudinaryService {
       });
     }
   }
+
+  extractPublicId(imageUrl: string) {
+    const parts = imageUrl.split('/');
+    const folderName = parts[parts.length - 2];
+    const filename = parts[parts.length - 1];
+    const [publicId] = filename.split('.');
+    return `${folderName}/${publicId}`;
+  }
 }
