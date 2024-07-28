@@ -18,8 +18,10 @@ async function bootstrap() {
 
   const allowedDomain = configService.get<string>('APP_FRONTEND_URL');
 
+  console.log(allowedDomain);
+
   app.enableCors({
-    origin: [allowedDomain, 'http://localhost:3000'],
+    origin: [allowedDomain],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
   });
