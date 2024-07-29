@@ -19,7 +19,7 @@ export class UpdateCategoryInput {
   };
 
   @IsOptional()
-  status?: 'Published' | 'Inactive' | 'Scheduled';
+  status?: 'Published' | 'Inactive';
 }
 
 export class UpdateCategoryOutput extends CoreOutput {

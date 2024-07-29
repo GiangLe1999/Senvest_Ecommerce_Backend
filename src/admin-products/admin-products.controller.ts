@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Put,
   Res,
   UploadedFiles,
   UseGuards,
@@ -18,6 +19,7 @@ import { CreateProductInput } from './dtos/create-product.dto';
 import { Response } from 'express';
 import { AdminProductsService } from './admin-products.service';
 import { AuthAdminGuard } from 'src/auth/admin/auth-admin.guard';
+import { UpdateProductInput } from './dtos/update-product.dto';
 
 @Controller('admins/admin-products')
 export class AdminProductsController {
@@ -34,6 +36,24 @@ export class AdminProductsController {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Get(':id')
+  @UseGuards(AuthAdminGuard)
+  async getProduct(@Res() res: Response, @Param('id') _id: string) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.adminProductsService.getProduct(_id));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
     }
   }
 
@@ -56,6 +76,32 @@ export class AdminProductsController {
       console.log(error);
       if (error instanceof BadRequestException) {
         res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Put('update')
+  @UseGuards(AuthAdminGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  async updateCategory(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Res() res: Response,
+    @Body() updateProductInput: UpdateProductInput,
+  ) {
+    try {
+      res.status(HttpStatus.OK).json(
+        await this.adminProductsService.updateProduct({
+          ...updateProductInput,
+          images: files,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
       } else {
         res
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
