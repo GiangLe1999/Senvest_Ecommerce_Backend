@@ -18,7 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreateProductInput } from './dtos/create-product.dto';
 import { Response } from 'express';
 import { AdminProductsService } from './admin-products.service';
-import { AuthAdminGuard } from 'src/auth/admin/auth-admin.guard';
+import { AuthAdminGuard } from '../auth/admin/auth-admin.guard';
 import { UpdateProductInput } from './dtos/update-product.dto';
 
 @Controller('admins/admin-products')

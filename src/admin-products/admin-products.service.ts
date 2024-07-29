@@ -15,7 +15,7 @@ import {
 import { Category, CategoryDocument } from '../schemas/category.schema';
 import slugify from 'slugify';
 import { GetProductsOutput } from './dtos/get-products.dto';
-import { CoreOutput } from 'src/common/dtos/output.dto';
+import { CoreOutput } from '../common/dtos/output.dto';
 import { GetProductOutput } from './dtos/get-product.dto';
 import {
   UpdateProductInput,

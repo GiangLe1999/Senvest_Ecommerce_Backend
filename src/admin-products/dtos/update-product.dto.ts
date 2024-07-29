@@ -1,6 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 import { CoreOutput } from '../../common/dtos/output.dto';
-import { Product } from 'src/schemas/product.schema';
+import { Product } from '../../schemas/product.schema';
 import { Transform } from 'class-transformer';
 import { BadRequestException } from '@nestjs/common';
 
