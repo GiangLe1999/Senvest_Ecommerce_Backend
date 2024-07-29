@@ -1,0 +1,18 @@
+import { IsString } from 'class-validator';
+import { CoreOutput } from '../../common/dtos/output.dto';
+import { Banner } from '../../schemas/Banner.schema';
+
+export class CreateBannerInput {
+  @IsString()
+  name: string;
+
+  @IsString()
+  status: 'Active' | 'Inactive';
+
+  @IsString()
+  order: string;
+}
+
+export class CreateBannerOutput extends CoreOutput {
+  banner?: Banner;
+}

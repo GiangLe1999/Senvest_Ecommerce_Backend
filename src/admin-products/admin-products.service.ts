@@ -218,6 +218,33 @@ export class AdminProductsService {
       }
 
       if (updateProductInput?.category) {
+        const newCategory = await this.categoryModel.findById(
+          updateProductInput?.category,
+        );
+
+        const oldCategory = await this.categoryModel.findById(product.category);
+
+        if (!newCategory) {
+          throw new NotFoundException({
+            ok: false,
+            error: 'Category does not exist',
+          });
+        }
+
+        if (!oldCategory) {
+          throw new NotFoundException({
+            ok: false,
+            error: 'Category does not exist',
+          });
+        }
+
+        oldCategory.products = oldCategory.products.filter(
+          (id: any) => id.toString() !== product._id.toString(),
+        );
+        newCategory.products.push(product._id);
+        newCategory.save();
+        oldCategory.save();
+
         updateObj = {
           ...updateObj,
           category: updateProductInput?.category || product.category._id,

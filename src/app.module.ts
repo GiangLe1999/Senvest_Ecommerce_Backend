@@ -16,6 +16,7 @@ import { AdminCategoriesModule } from './admin-categories/admin-categories.modul
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { AdminProductsModule } from './admin-products/admin-products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { AdminBannersModule } from './admin-banners/admin-banners.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { CategoriesModule } from './categories/categories.module';
     CloudinaryModule,
     AdminProductsModule,
     CategoriesModule,
+    AdminBannersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
