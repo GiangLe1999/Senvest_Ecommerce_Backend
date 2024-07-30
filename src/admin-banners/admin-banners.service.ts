@@ -7,7 +7,7 @@ import {
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { CreateBannerInput } from './dtos/create-banner.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { Banner, BannerDocument } from '../schemas/Banner.schema';
+import { Banner, BannerDocument } from '../schemas/banner.schema';
 import { Model } from 'mongoose';
 import { GetBannersOutput } from './dtos/get-banners.dto';
 import { CoreOutput } from '../common/dtos/output.dto';
