@@ -29,7 +29,7 @@ export class AdminBannersService {
 
   async getBanners(): Promise<GetBannersOutput> {
     try {
-      const banners = await this.bannersModel.find().lean();
+      const banners = await this.bannersModel.find().sort({ order: 1 }).lean();
 
       return {
         ok: true,
