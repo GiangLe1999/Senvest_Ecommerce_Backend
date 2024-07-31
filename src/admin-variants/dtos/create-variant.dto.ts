@@ -1,6 +1,7 @@
 import { Variant } from '../../schemas/variant.schema';
 import { CoreOutput } from '../../common/dtos/output.dto';
-import { IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString, IsDate } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateVariantInput {
   @IsString()
@@ -16,13 +17,15 @@ export class CreateVariantInput {
   @IsOptional()
   discountedPrice?: string;
 
-  @IsString()
+  @IsDate()
+  @Type(() => Date)
   @IsOptional()
-  discountedFrom?: string;
+  discountedFrom?: Date;
 
-  @IsString()
+  @IsDate()
+  @Type(() => Date)
   @IsOptional()
-  discountedTo?: string;
+  discountedTo?: Date;
 }
 
 export class CreateVariantOutput extends CoreOutput {

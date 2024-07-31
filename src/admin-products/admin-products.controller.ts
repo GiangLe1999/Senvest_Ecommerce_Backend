@@ -63,7 +63,6 @@ export class AdminProductsController {
     @Body() createProductInput: CreateProductInput,
     @Res() res: Response,
   ) {
-    console.log(createProductInput);
     try {
       res
         .status(HttpStatus.CREATED)
