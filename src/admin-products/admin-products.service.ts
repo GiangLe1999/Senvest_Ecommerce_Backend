@@ -21,6 +21,7 @@ import {
   UpdateProductInput,
   UpdateProductOutput,
 } from './dtos/update-product.dto';
+import { AdminVariantsService } from '../admin-variants/admin-variants.service';
 
 @Injectable()
 export class AdminProductsService {
@@ -28,6 +29,7 @@ export class AdminProductsService {
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly adminVariantService: AdminVariantsService,
   ) {}
 
   async findProductById(id: string): Promise<ProductDocument> {
@@ -38,11 +40,18 @@ export class AdminProductsService {
 
   async getProducts(): Promise<GetProductsOutput> {
     try {
-      const products = await this.productModel.find().populate({
-        path: 'category',
-        model: 'Category',
-        select: 'name image',
-      });
+      const products = await this.productModel.find().populate([
+        {
+          path: 'category',
+          model: 'Category',
+          select: 'name image',
+        },
+        {
+          path: 'variants',
+          model: 'Variant',
+          select: 'price stock images',
+        },
+      ]);
       return {
         ok: true,
         products,
@@ -59,11 +68,17 @@ export class AdminProductsService {
     try {
       const product = await this.productModel
         .findById(_id)
-        .populate({
-          path: 'category',
-          model: 'Category',
-          select: 'name _id',
-        })
+        .populate([
+          {
+            path: 'category',
+            model: 'Category',
+            select: 'name _id',
+          },
+          {
+            path: 'variants',
+            model: 'Variant',
+          },
+        ])
         .select('-totalSales -totalQuantitySold -slug')
         .lean();
 
@@ -74,19 +89,9 @@ export class AdminProductsService {
         });
       }
 
-      const FormattedProductVariants = product.variants.map((variant) => ({
-        ...variant,
-        price: String(variant.price),
-        discountedPrice: String(variant.discountedPrice),
-        stock: String(variant.stock),
-      }));
-
       return {
         ok: true,
-        product: {
-          ...product,
-          variants: FormattedProductVariants as any,
-        },
+        product,
       };
     } catch (error) {
       throw new InternalServerErrorException({
@@ -97,7 +102,7 @@ export class AdminProductsService {
   }
 
   async createProduct(
-    createProductInput: CreateProductInput & { images: Express.Multer.File[] },
+    createProductInput: CreateProductInput,
   ): Promise<CreateProductOutput> {
     try {
       const category = await this.categoryModel.findById(
@@ -113,10 +118,6 @@ export class AdminProductsService {
 
       const categoryObjectId = new Types.ObjectId(createProductInput.category);
 
-      const uploadResult = await this.cloudinaryService.uploadImages(
-        createProductInput.images,
-      );
-
       const enSlug = slugify(createProductInput.name.en, {
         lower: true,
         trim: true,
@@ -129,16 +130,18 @@ export class AdminProductsService {
         strict: true,
       });
 
+      const variants = createProductInput.variants.map(
+        (variant) => new Types.ObjectId(variant),
+      );
+
       const newProduct = new this.productModel({
         ...createProductInput,
-        ...(uploadResult && {
-          images: uploadResult.map((image) => image.secure_url),
-        }),
         category: categoryObjectId,
         slug: {
           en: enSlug,
           vi: viSlug,
         },
+        variants,
       });
       newProduct.save();
 
@@ -158,7 +161,7 @@ export class AdminProductsService {
   }
 
   async updateProduct(
-    updateProductInput: UpdateProductInput & { images: Express.Multer.File[] },
+    updateProductInput: UpdateProductInput,
   ): Promise<UpdateProductOutput> {
     try {
       const product = await this.findProductById(updateProductInput._id);
@@ -170,19 +173,6 @@ export class AdminProductsService {
       }
 
       let updateObj;
-
-      if (updateProductInput?.images?.length) {
-        if ((product?.images as any)?.length) {
-          await this.cloudinaryService.deleteImages(product.images as any);
-        }
-
-        const uploadResult = await this.cloudinaryService.uploadImages(
-          updateProductInput.images,
-        );
-        updateObj = {
-          images: uploadResult.map((image) => image.secure_url),
-        };
-      }
 
       if (updateProductInput?.name) {
         updateObj = {
@@ -252,6 +242,22 @@ export class AdminProductsService {
       }
 
       if (updateProductInput?.variants) {
+        const oldVariants = product.variants.map((variant) =>
+          variant.toString(),
+        );
+        const newVariants = new Set(updateProductInput.variants);
+        const deletedVariants = oldVariants.filter(
+          (variant) => !newVariants.has(variant),
+        );
+
+        if (deletedVariants?.length) {
+          const deletePromises = deletedVariants.map(async (variant) => {
+            return this.adminVariantService.deleteVariant(variant);
+          });
+
+          await Promise.all(deletePromises);
+        }
+
         updateObj = {
           ...updateObj,
           variants: updateProductInput?.variants || product.variants,
@@ -295,8 +301,6 @@ export class AdminProductsService {
         });
       }
 
-      await this.cloudinaryService.deleteImages(product.images as any);
-
       const category = await this.categoryModel.findById(product.category);
       if (category) {
         category.products = category.products.filter(
@@ -304,6 +308,11 @@ export class AdminProductsService {
         );
         await category.save();
       }
+
+      const deletePromises = product.variants.map(async (variant) => {
+        return this.adminVariantService.deleteVariant(variant.toString());
+      });
+      await Promise.all(deletePromises);
 
       await this.productModel.findByIdAndDelete(_id);
       return {

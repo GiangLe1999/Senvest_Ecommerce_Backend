@@ -5,6 +5,7 @@ import { CloudinaryModule } from '../cloudinary/cloudinary.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Product, ProductSchema } from '../schemas/product.schema';
 import { Category, CategorySchema } from '../schemas/category.schema';
+import { AdminVariantsModule } from '../admin-variants/admin-variants.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { Category, CategorySchema } from '../schemas/category.schema';
       { name: Product.name, schema: ProductSchema },
       { name: Category.name, schema: CategorySchema },
     ]),
+    AdminVariantsModule,
   ],
   controllers: [AdminProductsController],
   providers: [AdminProductsService],

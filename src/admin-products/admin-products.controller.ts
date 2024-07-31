@@ -10,7 +10,6 @@ import {
   Post,
   Put,
   Res,
-  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -26,7 +25,7 @@ export class AdminProductsController {
   constructor(private readonly adminProductsService: AdminProductsService) {}
 
   @Get()
-  @UseGuards(AuthAdminGuard)
+  // @UseGuards(AuthAdminGuard)
   async getProducts(@Res() res: Response) {
     try {
       res
@@ -61,17 +60,16 @@ export class AdminProductsController {
   @UseGuards(AuthAdminGuard)
   @UseInterceptors(FilesInterceptor('files'))
   async createProduct(
-    @UploadedFiles() files: Express.Multer.File[],
     @Body() createProductInput: CreateProductInput,
     @Res() res: Response,
   ) {
+    console.log(createProductInput);
     try {
-      res.status(HttpStatus.CREATED).json(
-        await this.adminProductsService.createProduct({
-          ...createProductInput,
-          images: files,
-        }),
-      );
+      res
+        .status(HttpStatus.CREATED)
+        .json(
+          await this.adminProductsService.createProduct(createProductInput),
+        );
     } catch (error) {
       console.log(error);
       if (error instanceof BadRequestException) {
@@ -86,19 +84,16 @@ export class AdminProductsController {
 
   @Put('update')
   @UseGuards(AuthAdminGuard)
-  @UseInterceptors(FilesInterceptor('files'))
-  async updateCategory(
-    @UploadedFiles() files: Express.Multer.File[],
+  async updateProduct(
     @Res() res: Response,
     @Body() updateProductInput: UpdateProductInput,
   ) {
     try {
-      res.status(HttpStatus.OK).json(
-        await this.adminProductsService.updateProduct({
-          ...updateProductInput,
-          images: files,
-        }),
-      );
+      res
+        .status(HttpStatus.OK)
+        .json(
+          await this.adminProductsService.updateProduct(updateProductInput),
+        );
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());

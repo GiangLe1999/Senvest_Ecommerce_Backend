@@ -18,6 +18,7 @@ import { AdminProductsModule } from './admin-products/admin-products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { AdminBannersModule } from './admin-banners/admin-banners.module';
 import { AdminSlogansModule } from './admin-slogans/admin-slogans.module';
+import { AdminVariantsModule } from './admin-variants/admin-variants.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { AdminSlogansModule } from './admin-slogans/admin-slogans.module';
     CategoriesModule,
     AdminBannersModule,
     AdminSlogansModule,
+    AdminVariantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,32 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum } from 'class-validator';
 import { HydratedDocument, Types } from 'mongoose';
 import {
   LocalizedString,
   LocalizedStringSchema,
 } from '../common/schemas/localized-string.schema';
-
-@Schema()
-export class Variant {
-  @Prop({ type: String, required: true })
-  @IsString()
-  color: string;
-
-  @Prop({ type: Number, default: 0 })
-  @IsNumber()
-  stock: number;
-
-  @Prop({ type: Number, required: true })
-  @IsNumber()
-  price: number;
-
-  @Prop({ type: Number })
-  @IsOptional()
-  discountedPrice?: number;
-}
-
-export const VariantSchema = SchemaFactory.createForClass(Variant);
 
 // HydratedDocument<Product> is a Mongoose utility type that combines the document type (Product) with Mongoose's built-in document methods
 // and properties (such as save(), toObject(), etc.).
@@ -47,15 +26,11 @@ export class Product {
   @Type(() => LocalizedString)
   description: LocalizedString;
 
-  @Prop({ type: [String], required: true })
-  images: { type: string[]; required: true };
-
   @Prop({ type: Types.ObjectId, ref: 'Category', required: true })
   category: Types.ObjectId;
 
-  @Prop({ type: [VariantSchema], required: true })
-  @Type(() => Variant)
-  variants: Variant[];
+  @Prop({ type: [{ type: Types.ObjectId, ref: 'Variant' }], default: [] })
+  variants: Types.ObjectId[];
 
   @Prop({ default: 0 })
   totalSales: number;

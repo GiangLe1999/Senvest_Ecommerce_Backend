@@ -1,8 +1,6 @@
 import { IsOptional, IsString } from 'class-validator';
 import { CoreOutput } from '../../common/dtos/output.dto';
 import { Product } from '../../schemas/product.schema';
-import { Transform } from 'class-transformer';
-import { BadRequestException } from '@nestjs/common';
 
 export class UpdateProductInput {
   @IsString()
@@ -24,20 +22,10 @@ export class UpdateProductInput {
   category?: string;
 
   @IsOptional()
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      try {
-        return JSON.parse(value);
-      } catch (error) {
-        throw new BadRequestException('Invalid JSON format for variants');
-      }
-    }
-    return value;
-  })
-  variants?: any;
+  variants?: string[];
 
   @IsOptional()
-  status?: 'Published' | 'Inactive' | 'Scheduled';
+  status?: 'Published' | 'Inactive';
 }
 
 export class UpdateProductOutput extends CoreOutput {
