@@ -7,7 +7,10 @@ export class UpdateSloganInput {
   _id: string;
 
   @IsOptional()
-  content?: string;
+  content?: {
+    en: string;
+    vi: string;
+  };
 
   @IsOptional()
   order?: string;

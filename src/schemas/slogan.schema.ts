@@ -1,14 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Type } from 'class-transformer';
 import { IsEnum, IsString } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
+import {
+  LocalizedString,
+  LocalizedStringSchema,
+} from 'src/common/schemas/localized-string.schema';
 
 export type SloganDocument = HydratedDocument<Slogan>;
 
 @Schema({ timestamps: true })
 export class Slogan {
-  @Prop({ type: String, required: true })
-  @IsString()
-  content: { type: string; required: true };
+  @Prop({ type: LocalizedStringSchema, required: true })
+  @Type(() => LocalizedString)
+  content: LocalizedString;
 
   @Prop({ default: 'Active', enum: ['Active', 'Inactive'] })
   @IsEnum(['Active', 'Inactive'])

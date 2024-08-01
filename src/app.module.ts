@@ -19,6 +19,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { AdminBannersModule } from './admin-banners/admin-banners.module';
 import { AdminSlogansModule } from './admin-slogans/admin-slogans.module';
 import { AdminVariantsModule } from './admin-variants/admin-variants.module';
+import { UsersModule } from './users/users.module';
+import { AuthUserMiddleware } from './auth/user/auth-user.middleware';
 
 @Module({
   imports: [
@@ -53,6 +55,7 @@ import { AdminVariantsModule } from './admin-variants/admin-variants.module';
     AdminBannersModule,
     AdminSlogansModule,
     AdminVariantsModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
@@ -62,5 +65,9 @@ export class AppModule implements NestModule {
     consumer
       .apply(AuthAdminMiddleware)
       .forRoutes({ path: '/admins/*', method: RequestMethod.ALL });
+
+    consumer
+      .apply(AuthUserMiddleware)
+      .forRoutes({ path: '/users/*', method: RequestMethod.ALL });
   }
 }

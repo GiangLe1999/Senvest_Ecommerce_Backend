@@ -67,6 +67,7 @@ export class AdminSlogansService {
         slogan: newSlogan,
       };
     } catch (error) {
+      console.log(error);
       throw new InternalServerErrorException({
         ok: false,
         error: error.message,
