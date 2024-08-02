@@ -17,10 +17,13 @@ async function bootstrap() {
       }),
     );
 
-    const allowedDomain = configService.get<string>('APP_FRONTEND_URL');
+    const allowedDomains = [
+      configService.get<string>('APP_FRONTEND_URL'),
+      configService.get<string>('APP_DASHBOARD_URL'),
+    ];
 
     app.enableCors({
-      origin: [allowedDomain],
+      origin: allowedDomains,
       methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
       credentials: true,
     });

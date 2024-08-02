@@ -33,6 +33,7 @@ import { SlogansModule } from './slogans/slogans.module';
         ENV: Joi.string().valid('dev', 'prod'),
         MONGODB_URI: Joi.string().required(),
         APP_FRONTEND_URL: Joi.string().required(),
+        APP_DASHBOARD_URL: Joi.string().required(),
         PORT: Joi.string().required(),
         ACCESS_TOKEN_KEY: Joi.string().required(),
         SECRET_TOKEN_KEY: Joi.string().required(),

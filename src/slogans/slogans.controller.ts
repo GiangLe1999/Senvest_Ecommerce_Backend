@@ -9,7 +9,7 @@ export class SlogansController {
   @Get()
   async getBanners(@Res() res: Response) {
     try {
-      // res.status(HttpStatus.OK).json(await this.slogansService.getSlogans());
+      res.status(HttpStatus.OK).json(await this.slogansService.getSlogans());
     } catch (error) {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
