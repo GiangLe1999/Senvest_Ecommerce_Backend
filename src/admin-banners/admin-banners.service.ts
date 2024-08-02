@@ -66,6 +66,7 @@ export class AdminBannersService {
         order: createBannerInput.order,
         name: createBannerInput.name,
         status: createBannerInput.status,
+        link: createBannerInput.link,
         image: uploadResult.secure_url,
       });
       return {
@@ -138,6 +139,13 @@ export class AdminBannersService {
         updateObj = {
           ...updateObj,
           status: updateBannerInput?.status,
+        };
+      }
+
+      if (updateBannerInput?.link) {
+        updateObj = {
+          ...updateObj,
+          link: updateBannerInput?.link,
         };
       }
 

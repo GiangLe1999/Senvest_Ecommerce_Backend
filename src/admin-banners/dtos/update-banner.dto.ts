@@ -10,6 +10,9 @@ export class UpdateBannerInput {
   name?: string;
 
   @IsOptional()
+  link?: string;
+
+  @IsOptional()
   order?: string;
 
   @IsOptional()

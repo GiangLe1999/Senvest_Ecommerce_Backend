@@ -14,6 +14,10 @@ export class Banner {
   @IsString()
   image: { type: string; required: true };
 
+  @Prop({ type: String, required: true })
+  @IsString()
+  link: { type: string; required: true };
+
   @Prop({ default: 'Active', enum: ['Active', 'Inactive'] })
   @IsEnum(['Active', 'Inactive'])
   status: string;

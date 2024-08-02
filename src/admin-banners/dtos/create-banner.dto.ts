@@ -7,6 +7,9 @@ export class CreateBannerInput {
   name: string;
 
   @IsString()
+  link: string;
+
+  @IsString()
   status: 'Active' | 'Inactive';
 
   @IsString()
