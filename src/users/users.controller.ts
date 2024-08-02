@@ -10,8 +10,8 @@ import { UsersService } from './users.service';
 import { UserRegisterInput } from './dtos/user-register.dto';
 import { Response } from 'express';
 import { UserLoginInput } from './dtos/user-login.dto';
-import { AuthUser } from 'src/auth/user/auth-user.decorator';
-import { UserDocument } from 'src/schemas/user.schema';
+import { AuthUser } from '../auth/user/auth-user.decorator';
+import { UserDocument } from '../schemas/user.schema';
 import { UserGoogleLoginInput } from './dtos/user-google-login.dto';
 
 @Controller('users')

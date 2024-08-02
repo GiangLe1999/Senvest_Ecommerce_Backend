@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../auth/auth.service';
 import { UserRefreshTokenOutput } from './dtos/user-refresh-token';
-import { User, UserDocument } from 'src/schemas/user.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 import {
   UserRegisterInput,
   UserRegisterOutput,

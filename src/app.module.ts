@@ -21,6 +21,7 @@ import { AdminSlogansModule } from './admin-slogans/admin-slogans.module';
 import { AdminVariantsModule } from './admin-variants/admin-variants.module';
 import { UsersModule } from './users/users.module';
 import { AuthUserMiddleware } from './auth/user/auth-user.middleware';
+import { SlogansModule } from './slogans/slogans.module';
 
 @Module({
   imports: [
@@ -56,6 +57,7 @@ import { AuthUserMiddleware } from './auth/user/auth-user.middleware';
     AdminSlogansModule,
     AdminVariantsModule,
     UsersModule,
+    SlogansModule,
   ],
   controllers: [AppController],
   providers: [AppService],

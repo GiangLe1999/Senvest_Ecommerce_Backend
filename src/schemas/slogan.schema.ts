@@ -5,7 +5,7 @@ import { HydratedDocument } from 'mongoose';
 import {
   LocalizedString,
   LocalizedStringSchema,
-} from 'src/common/schemas/localized-string.schema';
+} from '../common/schemas/localized-string.schema';
 
 export type SloganDocument = HydratedDocument<Slogan>;
 
