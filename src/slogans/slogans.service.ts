@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Slogan, SloganDocument } from 'src/schemas/slogan.schema';
+import { Slogan, SloganDocument } from '../schemas/slogan.schema';
 import { GetSlogansOutput } from './dtos/get-slogans.dto';
 
 @Injectable()
