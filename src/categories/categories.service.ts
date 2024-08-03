@@ -27,4 +27,23 @@ export class CategoriesService {
       });
     }
   }
+
+  async getCategoriesForNavigation(): Promise<GetCategoriesOutput> {
+    try {
+      const categories = await this.categoryModel
+        .find({ status: 'Published' })
+        .select('name slug')
+        .lean();
+
+      return {
+        ok: true,
+        categories,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: 'Internal server error',
+      });
+    }
+  }
 }
