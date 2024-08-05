@@ -41,6 +41,32 @@ export class CloudinaryService {
     return Promise.all(uploadPromises);
   }
 
+  async uploadVideo(
+    file: Express.Multer.File,
+  ): Promise<UploadApiResponse | UploadApiErrorResponse> {
+    return new Promise((resolve, reject) => {
+      const upload = cloudinary.uploader.upload_stream(
+        {
+          resource_type: 'video', // specify the resource type as video
+          folder: this.config.get('CLOUDINARY_FOLDER'),
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        },
+      );
+
+      streamifier.createReadStream(file.buffer).pipe(upload);
+    });
+  }
+
+  async uploadVideos(
+    files: Express.Multer.File[],
+  ): Promise<(UploadApiResponse | UploadApiErrorResponse)[]> {
+    const uploadPromises = files.map((file) => this.uploadVideo(file));
+    return Promise.all(uploadPromises);
+  }
+
   extractPublicId(imageUrl: string) {
     const parts = imageUrl.split('/');
     const folderName = parts[parts.length - 2];
@@ -76,6 +102,41 @@ export class CloudinaryService {
       throw new InternalServerErrorException({
         ok: false,
         error: 'Xóa ảnh không thành công',
+      });
+    }
+  }
+
+  async deleteVideo(secureUrl: string): Promise<{ result: string }> {
+    try {
+      const publicId = this.extractPublicId(secureUrl);
+      const result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: 'video',
+      });
+      return result;
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: 'Xóa video không thành công',
+      });
+    }
+  }
+
+  async deleteVideos(secureUrls: string[]): Promise<{ result: string }[]> {
+    try {
+      const deletePromises = secureUrls.map(async (secureUrl) => {
+        const publicId = this.extractPublicId(secureUrl);
+        const result = await cloudinary.uploader.destroy(publicId, {
+          resource_type: 'video',
+        });
+        return result;
+      });
+
+      const results = await Promise.all(deletePromises);
+      return results;
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: 'Xóa video không thành công',
       });
     }
   }

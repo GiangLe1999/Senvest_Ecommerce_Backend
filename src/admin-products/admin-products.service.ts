@@ -22,6 +22,7 @@ import {
   UpdateProductOutput,
 } from './dtos/update-product.dto';
 import { AdminVariantsService } from '../admin-variants/admin-variants.service';
+import { UploadProductVideosInput } from './dtos/upload-product-videos';
 
 @Injectable()
 export class AdminProductsService {
@@ -290,6 +291,83 @@ export class AdminProductsService {
     }
   }
 
+  async uploadProductVideos(
+    uploadProductVideosInput: UploadProductVideosInput & {
+      videos: Express.Multer.File[];
+    },
+  ): Promise<CoreOutput> {
+    try {
+      const product = await this.findProductById(uploadProductVideosInput._id);
+
+      if (!product) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Product does not exist',
+        });
+      }
+
+      const uploadResult = await this.cloudinaryService.uploadVideos(
+        uploadProductVideosInput.videos,
+      );
+
+      product.videos = uploadResult.map((video) => video.secure_url);
+      await product.save();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
+  }
+
+  async updateProductVideos(
+    updateProductVideosInput: UploadProductVideosInput & {
+      videos: Express.Multer.File[];
+    },
+  ): Promise<CoreOutput> {
+    try {
+      const product = await this.findProductById(updateProductVideosInput._id);
+
+      if (!product) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Product does not exist',
+        });
+      }
+
+      if (product?.videos.length) {
+        await this.cloudinaryService.deleteVideos(product.videos as any);
+      }
+
+      if (updateProductVideosInput.videos.length === 0) {
+        product.videos = [];
+        await product.save();
+        return {
+          ok: true,
+        };
+      }
+
+      const uploadResult = await this.cloudinaryService.uploadVideos(
+        updateProductVideosInput.videos,
+      );
+
+      product.videos = uploadResult.map((video) => video.secure_url);
+
+      await product.save();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
+  }
+
   async deleteProduct(_id: string): Promise<CoreOutput> {
     try {
       const product = await this.findProductById(_id);
@@ -307,6 +385,10 @@ export class AdminProductsService {
           (product) => product.toString() !== _id,
         );
         await category.save();
+      }
+
+      if (product?.videos.length) {
+        await this.cloudinaryService.deleteVideos(product.videos as any);
       }
 
       const deletePromises = product.variants.map(async (variant) => {

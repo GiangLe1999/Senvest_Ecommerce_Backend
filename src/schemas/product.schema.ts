@@ -32,6 +32,9 @@ export class Product {
   @Prop({ type: [{ type: Types.ObjectId, ref: 'Variant' }], default: [] })
   variants: Types.ObjectId[];
 
+  @Prop({ type: [String] })
+  videos?: string[];
+
   @Prop({ default: 0 })
   totalSales: number;
 

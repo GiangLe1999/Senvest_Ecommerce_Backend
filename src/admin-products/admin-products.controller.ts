@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Res,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -19,6 +20,7 @@ import { Response } from 'express';
 import { AdminProductsService } from './admin-products.service';
 import { AuthAdminGuard } from '../auth/admin/auth-admin.guard';
 import { UpdateProductInput } from './dtos/update-product.dto';
+import { UploadProductVideosInput } from './dtos/upload-product-videos';
 
 @Controller('admins/admin-products')
 export class AdminProductsController {
@@ -93,6 +95,58 @@ export class AdminProductsController {
         .json(
           await this.adminProductsService.updateProduct(updateProductInput),
         );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Post('videos')
+  @UseGuards(AuthAdminGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  async uploadProductVideos(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Res() res: Response,
+    @Body() uploadProductVideosInput: UploadProductVideosInput,
+  ) {
+    try {
+      res.status(HttpStatus.OK).json(
+        await this.adminProductsService.uploadProductVideos({
+          ...uploadProductVideosInput,
+          videos: files,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Put('videos')
+  @UseGuards(AuthAdminGuard)
+  @UseInterceptors(FilesInterceptor('files'))
+  async updateProductVideos(
+    @UploadedFiles() files: Express.Multer.File[],
+    @Res() res: Response,
+    @Body() updateProductVideosInput: UploadProductVideosInput,
+  ) {
+    try {
+      res.status(HttpStatus.OK).json(
+        await this.adminProductsService.updateProductVideos({
+          ...updateProductVideosInput,
+          videos: files,
+        }),
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
