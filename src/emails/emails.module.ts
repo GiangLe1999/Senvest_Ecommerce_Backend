@@ -32,7 +32,7 @@ import {
           from: `"${configService.get<string>(EMAIL_FROM_NAME)}" <${configService.get<string>(EMAIL_FROM_ADDRESS)}>`,
         },
         template: {
-          dir: join(process.cwd(), 'dist', 'emails', 'templates'),
+          dir: join(process.cwd(), 'src', 'emails', 'templates'),
           adapter: new EjsAdapter(),
           options: {
             strict: false,
