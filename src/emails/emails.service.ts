@@ -13,7 +13,6 @@ export class EmailsService {
     sendVerifyEmailInput: SendVerifyEmailInput,
   ): Promise<SendVerifyEmailOutput> {
     try {
-      console.log('test');
       const { to, otp } = sendVerifyEmailInput;
       const subject = 'Verify your email address';
 
