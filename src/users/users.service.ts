@@ -5,7 +5,7 @@ import {
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserLoginInput, UserLoginOutput } from './dtos/user-login.dto';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../auth/auth.service';
 import { UserRefreshTokenOutput } from './dtos/user-refresh-token';
@@ -14,12 +14,25 @@ import {
   UserRegisterInput,
   UserRegisterOutput,
 } from './dtos/user-register.dto';
+import { EmailsService } from '../emails/emails.service';
+import {
+  Verification,
+  VerificationDocument,
+} from '../schemas/verification.schema';
+import {
+  UserVerifyAccountInput,
+  UserVerifyAccountOutput,
+} from './dtos/user-verify-account.dto';
+import { CoreOutput } from '../common/dtos/output.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private usersModel: Model<UserDocument>,
+    @InjectModel(Verification.name)
+    private verificationsModel: Model<VerificationDocument>,
     private readonly authService: AuthService,
+    private readonly emailsService: EmailsService,
   ) {}
 
   async findUserById(_id: string): Promise<UserDocument> {
@@ -39,12 +52,25 @@ export class UsersService {
     if (existingUser) {
       throw new BadRequestException({ ok: false, error: 'User đã tồn tại' });
     }
+
     const hashedPassword = await bcrypt.hash(userRegisterInput.password, 10);
     const newUser = new this.usersModel({
       ...userRegisterInput,
       password: hashedPassword,
     });
     await newUser.save();
+
+    const otp = this.authService.createVerifyOtp(newUser.email);
+    await this.verificationsModel.create({
+      email: newUser.email,
+      otp,
+      user: new Types.ObjectId(newUser._id),
+    });
+
+    await this.emailsService.sendVerifyEmail({
+      to: newUser.email,
+      otp,
+    });
 
     return { ok: true };
   }
@@ -122,6 +148,66 @@ export class UsersService {
         user: existingUser,
       };
     }
+  }
+
+  async userVerifyAccount(
+    userVerifyAccountInput: UserVerifyAccountInput,
+  ): Promise<UserVerifyAccountOutput> {
+    const { email, otp } = userVerifyAccountInput;
+
+    const verification = await this.verificationsModel.findOne({
+      otp,
+      email,
+    });
+
+    if (!verification) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'Invalid OTP',
+      });
+    }
+
+    const user = await this.usersModel.findById(verification.user);
+
+    if (!user) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'User not found',
+      });
+    }
+
+    user.is_verified = true;
+    await user.save();
+    await this.verificationsModel.deleteOne({ _id: verification._id });
+
+    return {
+      ok: true,
+    };
+  }
+
+  async userResendOtp({ email }: { email: string }): Promise<CoreOutput> {
+    const verification = await this.verificationsModel.findOne({ email });
+
+    if (!verification) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'Not found user',
+      });
+    }
+
+    const otp = this.authService.createVerifyOtp(email);
+
+    verification.otp = otp;
+    await verification.save();
+
+    await this.emailsService.sendVerifyEmail({
+      to: email,
+      otp,
+    });
+
+    return {
+      ok: true,
+    };
   }
 
   async userRefreshToken(_id: string): Promise<UserRefreshTokenOutput> {

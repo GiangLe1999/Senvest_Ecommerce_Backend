@@ -13,6 +13,7 @@ import { UserLoginInput } from './dtos/user-login.dto';
 import { AuthUser } from '../auth/user/auth-user.decorator';
 import { UserDocument } from '../schemas/user.schema';
 import { UserGoogleLoginInput } from './dtos/user-google-login.dto';
+import { UserVerifyAccountInput } from './dtos/user-verify-account.dto';
 
 @Controller('users')
 export class UsersController {
@@ -27,6 +28,48 @@ export class UsersController {
       res
         .status(HttpStatus.CREATED)
         .json(await this.usersService.userRegister(userRegisterInput));
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Post('verify')
+  async userVerifyAccount(
+    @Body() userVerifyAccountInput: UserVerifyAccountInput,
+    @Res() res: Response,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(
+          await this.usersService.userVerifyAccount(userVerifyAccountInput),
+        );
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Post('resend-otp')
+  async userResendOtp(
+    @Body() userResendOtpInput: { email: string },
+    @Res() res: Response,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.usersService.userResendOtp(userResendOtpInput));
     } catch (error) {
       if (error instanceof BadRequestException) {
         res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());

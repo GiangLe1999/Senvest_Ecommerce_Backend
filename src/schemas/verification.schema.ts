@@ -14,7 +14,7 @@ export class Verification {
   @IsString()
   otp: string;
 
-  @Prop({ type: { type: Types.ObjectId, ref: 'User' } })
+  @Prop({ type: Types.ObjectId, ref: 'User' })
   user: Types.ObjectId;
 }
 

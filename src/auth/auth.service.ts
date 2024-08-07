@@ -63,7 +63,7 @@ export class AuthService {
     }
   }
 
-  createVerifyOtp(email: string, duration: number = 70): string {
+  createVerifyOtp(email: string, duration: number = 61): string {
     try {
       const totp = new OTPAuth.TOTP({
         issuer: this.options.appName,
@@ -83,16 +83,16 @@ export class AuthService {
 
   verifyOtp({
     otp,
-    tel,
-    duration = 70,
+    email,
+    duration = 61,
   }: {
     otp: string;
-    tel: string;
+    email: string;
     duration?: number;
   }): boolean {
     const totp = new OTPAuth.TOTP({
       issuer: this.options.appName,
-      label: tel,
+      label: email,
       algorithm: 'SHA1',
       digits: 6,
       period: duration,
