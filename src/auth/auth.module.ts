@@ -6,6 +6,8 @@ import { JwtService } from '@nestjs/jwt';
 export interface AuthModuleOptions {
   accessTokenKey: string;
   secretTokenKey: string;
+  otpAuthSecret: string;
+  appName: string;
 }
 
 @Global()

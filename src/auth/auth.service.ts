@@ -3,6 +3,7 @@ import { CONFIG_OPTIONS } from './auth.constants';
 import { AuthModuleOptions } from './auth.module';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import * as OTPAuth from 'otpauth';
 
 @Injectable()
 export class AuthService {
@@ -59,6 +60,49 @@ export class AuthService {
       });
     } catch (error) {
       return null;
+    }
+  }
+
+  createVerifyOtp(email: string, duration: number = 70): string {
+    try {
+      const totp = new OTPAuth.TOTP({
+        issuer: this.options.appName,
+        label: email,
+        algorithm: 'SHA1',
+        digits: 6,
+        period: duration,
+        secret: OTPAuth.Secret.fromBase32(this.options.otpAuthSecret),
+      });
+      const token = totp.generate();
+      return token;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  }
+
+  verifyOtp({
+    otp,
+    tel,
+    duration = 70,
+  }: {
+    otp: string;
+    tel: string;
+    duration?: number;
+  }): boolean {
+    const totp = new OTPAuth.TOTP({
+      issuer: this.options.appName,
+      label: tel,
+      algorithm: 'SHA1',
+      digits: 6,
+      period: duration,
+      secret: OTPAuth.Secret.fromBase32(this.options.otpAuthSecret),
+    });
+    const isValid = totp.validate({ token: otp });
+    if (isValid !== null) {
+      return true;
+    } else {
+      return false;
     }
   }
 }

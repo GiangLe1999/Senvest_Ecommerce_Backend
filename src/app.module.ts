@@ -38,6 +38,7 @@ import { SlogansModule } from './slogans/slogans.module';
         ACCESS_TOKEN_KEY: Joi.string().required(),
         SECRET_TOKEN_KEY: Joi.string().required(),
         ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
+        OTP_AUTH_SECRET: Joi.string().required(),
         CLOUDINARY_CLOUD_NAME: Joi.string().required(),
         CLOUDINARY_API_KEY: Joi.string().required(),
         CLOUDINARY_API_SECRET: Joi.string().required(),
@@ -49,6 +50,7 @@ import { SlogansModule } from './slogans/slogans.module';
     AuthModule.forRoot({
       accessTokenKey: process.env.ACCESS_TOKEN_KEY,
       secretTokenKey: process.env.SECRET_TOKEN_KEY,
+      otpAuthSecret: process.env.OTP_AUTH_SECRET,
     }),
     AdminCategoriesModule,
     CloudinaryModule,
