@@ -20,6 +20,7 @@ import { UserVerifyAccountInput } from './dtos/user-verify-account.dto';
 import { UserForgotPasswordInput } from './dtos/user-forgot-password.dto';
 import { UserResetPasswordInput } from './dtos/user-reset-password.dto';
 import { AuthUserGuard } from 'src/auth/user/auth-user.guard';
+import { UserUpdateProfileInput } from './dtos/user-update-profile.dto';
 
 @Controller('users')
 export class UsersController {
@@ -122,7 +123,9 @@ export class UsersController {
   @Post('refresh-token')
   async userRefreshToken(@Res() res: Response, @AuthUser() user: UserDocument) {
     try {
-      res.json(await this.usersService.userRefreshToken(user._id.toString()));
+      res
+        .status(HttpStatus.OK)
+        .json(await this.usersService.userRefreshToken(user._id.toString()));
     } catch (error) {
       if (error instanceof BadRequestException) {
         res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
@@ -193,6 +196,31 @@ export class UsersController {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Put('profile')
+  @UseGuards(AuthUserGuard)
+  async userUpdateProfile(
+    @Res() res: Response,
+    @AuthUser() user: UserDocument,
+    @Body() userUpdateProfileInput: UserUpdateProfileInput,
+  ) {
+    try {
+      res.status(HttpStatus.OK).json(
+        await this.usersService.userUpdateProfile({
+          ...userUpdateProfileInput,
+          _id: user._id.toString(),
+        }),
+      );
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
     }
   }
 }

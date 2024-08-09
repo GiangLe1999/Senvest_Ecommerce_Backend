@@ -33,6 +33,10 @@ import {
   UserResetPasswordInput,
   UserResetPasswordOutput,
 } from './dtos/user-reset-password.dto';
+import {
+  UserUpdateProfileInput,
+  UserUpdateProfileOutput,
+} from './dtos/user-update-profile.dto';
 
 @Injectable()
 export class UsersService {
@@ -310,6 +314,67 @@ export class UsersService {
     user.password = hashedPassword;
     await user.save();
 
+    return {
+      ok: true,
+    };
+  }
+
+  async userUpdateProfile(
+    userUpdateProfileInput: UserUpdateProfileInput & { _id: string },
+  ): Promise<UserUpdateProfileOutput> {
+    if (!userUpdateProfileInput._id) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'Missing user id',
+      });
+    }
+
+    const user = await this.usersModel.findById(userUpdateProfileInput._id);
+    if (!user) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'User not found',
+      });
+    }
+
+    if (userUpdateProfileInput.name) {
+      user.name = userUpdateProfileInput.name;
+    }
+
+    if (userUpdateProfileInput.date_of_birth) {
+      user.date_of_birth = userUpdateProfileInput.date_of_birth;
+    }
+
+    if (userUpdateProfileInput.gender) {
+      user.gender = userUpdateProfileInput.gender;
+    }
+
+    if (userUpdateProfileInput.receive_offers) {
+      user.receive_offers = userUpdateProfileInput.receive_offers;
+    }
+
+    if (userUpdateProfileInput.current_password) {
+      const isMatchPassword = await bcrypt.compare(
+        userUpdateProfileInput.current_password,
+        user.password,
+      );
+      if (!isMatchPassword) {
+        throw new BadRequestException({
+          ok: false,
+          error: 'Current password is incorrect',
+        });
+      }
+
+      if (userUpdateProfileInput.new_password) {
+        const hashedPassword = await bcrypt.hash(
+          userUpdateProfileInput.new_password,
+          10,
+        );
+        user.password = hashedPassword;
+      }
+    }
+
+    await user.save();
     return {
       ok: true,
     };
