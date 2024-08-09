@@ -7,6 +7,7 @@ export interface AuthModuleOptions {
   accessTokenKey: string;
   secretTokenKey: string;
   otpAuthSecret: string;
+  resetPasswordTokenKey: string;
   appName: string;
 }
 

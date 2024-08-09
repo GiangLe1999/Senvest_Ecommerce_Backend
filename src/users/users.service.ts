@@ -24,6 +24,15 @@ import {
   UserVerifyAccountOutput,
 } from './dtos/user-verify-account.dto';
 import { CoreOutput } from '../common/dtos/output.dto';
+import {
+  UserForgotPasswordInput,
+  UserForgotPasswordOutput,
+} from './dtos/user-forgot-password.dto';
+import { ConfigService } from '@nestjs/config';
+import {
+  UserResetPasswordInput,
+  UserResetPasswordOutput,
+} from './dtos/user-reset-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,6 +42,7 @@ export class UsersService {
     private verificationsModel: Model<VerificationDocument>,
     private readonly authService: AuthService,
     private readonly emailsService: EmailsService,
+    private readonly config: ConfigService,
   ) {}
 
   async findUserById(_id: string): Promise<UserDocument> {
@@ -225,6 +235,83 @@ export class UsersService {
       accessToken,
       refreshToken,
       expiresIn,
+    };
+  }
+
+  async userForgotPassword(
+    forgotPasswordInput: UserForgotPasswordInput,
+  ): Promise<UserForgotPasswordOutput> {
+    const { email, locale } = forgotPasswordInput;
+    const user = await this.usersModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'User not found',
+      });
+    }
+
+    if (!user.is_verified) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'User not verified',
+      });
+    }
+
+    if (!user.password) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'Cannot reset password',
+      });
+    }
+
+    const resetPasswordToken =
+      await this.authService.createResetPasswordToken(email);
+    await this.emailsService.sendResetPasswordEmail({
+      email,
+      emailLink: `mailto:${email}`,
+      link: `${this.config.get('APP_FRONTEND_URL')}/${locale}/reset-password?token=${resetPasswordToken}`,
+    });
+
+    return {
+      ok: true,
+    };
+  }
+
+  async userResetPassword(
+    resetPasswordInput: UserResetPasswordInput,
+  ): Promise<UserResetPasswordOutput> {
+    const { password, token } = resetPasswordInput;
+
+    const { email } = await this.authService.verifyResetPasswordToken(token);
+
+    const user = await this.usersModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'User not found',
+      });
+    }
+
+    if (!user.is_verified) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'User not verified',
+      });
+    }
+
+    if (!user.password) {
+      throw new BadRequestException({
+        ok: false,
+        error: 'Cannot reset password',
+      });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user.password = hashedPassword;
+    await user.save();
+
+    return {
+      ok: true,
     };
   }
 }

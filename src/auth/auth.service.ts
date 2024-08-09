@@ -27,6 +27,13 @@ export class AuthService {
     );
   }
 
+  async createResetPasswordToken(email: string): Promise<string> {
+    return await this.jwtService.signAsync(
+      { email },
+      { expiresIn: '1h', secret: this.options.resetPasswordTokenKey },
+    );
+  }
+
   async provideToken(
     _id: string,
   ): Promise<{ accessToken: string; refreshToken: string; expiresIn: number }> {
@@ -57,6 +64,16 @@ export class AuthService {
     try {
       return await this.jwtService.verify(token, {
         secret: this.options.secretTokenKey,
+      });
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async verifyResetPasswordToken(token: string): Promise<any> {
+    try {
+      return await this.jwtService.verify(token, {
+        secret: this.options.resetPasswordTokenKey,
       });
     } catch (error) {
       return null;

@@ -12,8 +12,8 @@ import { HydratedDocument } from 'mongoose';
 export type UserDocument = HydratedDocument<User>;
 
 export enum GenderEnum {
-  male = 'Male',
-  female = 'Female',
+  male = 'male',
+  female = 'memale',
 }
 
 @Schema({ timestamps: true })

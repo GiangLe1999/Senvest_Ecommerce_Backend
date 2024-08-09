@@ -2,9 +2,12 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   HttpStatus,
   Post,
+  Put,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { UserRegisterInput } from './dtos/user-register.dto';
@@ -14,6 +17,9 @@ import { AuthUser } from '../auth/user/auth-user.decorator';
 import { UserDocument } from '../schemas/user.schema';
 import { UserGoogleLoginInput } from './dtos/user-google-login.dto';
 import { UserVerifyAccountInput } from './dtos/user-verify-account.dto';
+import { UserForgotPasswordInput } from './dtos/user-forgot-password.dto';
+import { UserResetPasswordInput } from './dtos/user-reset-password.dto';
+import { AuthUserGuard } from 'src/auth/user/auth-user.guard';
 
 @Controller('users')
 export class UsersController {
@@ -125,6 +131,68 @@ export class UsersController {
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
           .json({ ok: false, error: error.message });
       }
+    }
+  }
+
+  @Post('forgot-password')
+  async userForgotPassword(
+    @Body()
+    userForgotPasswordInput: UserForgotPasswordInput,
+    @Res() res: Response,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(
+          await this.usersService.userForgotPassword(userForgotPasswordInput),
+        );
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Put('reset-password')
+  async userResetPassword(
+    @Body()
+    userResetPasswordInput: UserResetPasswordInput,
+    @Res() res: Response,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(
+          await this.usersService.userResetPassword(userResetPasswordInput),
+        );
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
+  @Get('profile')
+  @UseGuards(AuthUserGuard)
+  async getUserProfile(@Res() res: Response, @AuthUser() user: UserDocument) {
+    try {
+      delete user.password;
+      res.status(HttpStatus.OK).json({
+        ok: true,
+        data: user,
+      });
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
     }
   }
 }

@@ -4,6 +4,10 @@ import {
   SendVerifyEmailInput,
   SendVerifyEmailOutput,
 } from './dtos/send-verify-email.dto';
+import {
+  SendResetPasswordEmailInput,
+  SendResetPasswordEmailOutput,
+} from './dtos/send-reset-password-email.dto';
 
 @Injectable()
 export class EmailsService {
@@ -22,6 +26,32 @@ export class EmailsService {
         template: './verify-email',
         context: {
           otp,
+        },
+      });
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error);
+    }
+  }
+
+  async sendResetPasswordEmail(
+    sendResetPasswordEmailInput: SendResetPasswordEmailInput,
+  ): Promise<SendResetPasswordEmailOutput> {
+    try {
+      const { email, emailLink, link } = sendResetPasswordEmailInput;
+      const subject = 'Verify your email address';
+
+      await this.mailerService.sendMail({
+        to: email,
+        subject,
+        template: './reset-password-email',
+        context: {
+          email,
+          emailLink,
+          link,
         },
       });
 
