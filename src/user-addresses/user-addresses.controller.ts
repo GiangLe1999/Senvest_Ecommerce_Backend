@@ -4,8 +4,10 @@ import {
   Delete,
   Get,
   HttpStatus,
+  NotFoundException,
   Param,
   Post,
+  Put,
   Res,
   UseGuards,
 } from '@nestjs/common';
@@ -15,6 +17,7 @@ import { CreateUserAddressInput } from './dtos/create-user-address.dto';
 import { AuthUser } from '../auth/user/auth-user.decorator';
 import { UserDocument } from '../schemas/user.schema';
 import { Response } from 'express';
+import { UpdateUserAddressInput } from './dtos/update-user-address.dto';
 
 @Controller('users/user-addresses')
 export class UserAddressesController {
@@ -34,6 +37,31 @@ export class UserAddressesController {
     }
   }
 
+  @Get(':id')
+  @UseGuards(AuthUserGuard)
+  async getUserAddress(
+    @AuthUser() user: UserDocument,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    try {
+      res.status(HttpStatus.OK).json(
+        await this.userAddressesService.getUserAddress({
+          address_id: id,
+          user_id: user._id,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
   @Post('create')
   @UseGuards(AuthUserGuard)
   async createUserAddress(
@@ -46,6 +74,27 @@ export class UserAddressesController {
         await this.userAddressesService.createUserAddress({
           ...createUserAddressInput,
           user_id: user._id.toString(),
+        }),
+      );
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Put('update')
+  @UseGuards(AuthUserGuard)
+  async updateUserAddress(
+    @Body() updateUserAddressInput: UpdateUserAddressInput,
+    @AuthUser() user: UserDocument,
+    @Res() res: Response,
+  ) {
+    try {
+      res.status(HttpStatus.CREATED).json(
+        await this.userAddressesService.updateUserAddress({
+          ...updateUserAddressInput,
+          user_id: user._id,
         }),
       );
     } catch (error) {
