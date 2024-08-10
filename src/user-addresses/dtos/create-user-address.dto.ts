@@ -1,6 +1,6 @@
 import { PickType } from '@nestjs/mapped-types';
 import { CoreOutput } from '../../common/dtos/output.dto';
-import { UserAddress } from 'src/schemas/user-address.schema';
+import { UserAddress } from '../../schemas/user-address.schema';
 
 export class CreateUserAddressInput extends PickType(UserAddress, [
   'alias',

@@ -4,12 +4,12 @@ import { Model, Types } from 'mongoose';
 import {
   UserAddress,
   UserAddressDocument,
-} from 'src/schemas/user-address.schema';
+} from '../schemas/user-address.schema';
 import {
   CreateUserAddressInput,
   CreateUserAddressOutput,
 } from './dtos/create-user-address.dto';
-import { CoreOutput } from 'src/common/dtos/output.dto';
+import { CoreOutput } from '../common/dtos/output.dto';
 
 @Injectable()
 export class UserAddressesService {

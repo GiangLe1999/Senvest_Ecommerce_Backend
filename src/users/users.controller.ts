@@ -19,7 +19,7 @@ import { UserGoogleLoginInput } from './dtos/user-google-login.dto';
 import { UserVerifyAccountInput } from './dtos/user-verify-account.dto';
 import { UserForgotPasswordInput } from './dtos/user-forgot-password.dto';
 import { UserResetPasswordInput } from './dtos/user-reset-password.dto';
-import { AuthUserGuard } from 'src/auth/user/auth-user.guard';
+import { AuthUserGuard } from '../auth/user/auth-user.guard';
 import { UserUpdateProfileInput } from './dtos/user-update-profile.dto';
 
 @Controller('users')

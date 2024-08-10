@@ -10,10 +10,10 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { UserAddressesService } from './user-addresses.service';
-import { AuthUserGuard } from 'src/auth/user/auth-user.guard';
+import { AuthUserGuard } from '../auth/user/auth-user.guard';
 import { CreateUserAddressInput } from './dtos/create-user-address.dto';
-import { AuthUser } from 'src/auth/user/auth-user.decorator';
-import { UserDocument } from 'src/schemas/user.schema';
+import { AuthUser } from '../auth/user/auth-user.decorator';
+import { UserDocument } from '../schemas/user.schema';
 import { Response } from 'express';
 
 @Controller('users/user-addresses')

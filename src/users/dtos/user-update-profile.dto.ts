@@ -1,6 +1,6 @@
 import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
 import { CoreOutput } from '../../common/dtos/output.dto';
-import { GenderEnum } from 'src/schemas/user.schema';
+import { GenderEnum } from '../../schemas/user.schema';
 
 export class UserUpdateProfileInput {
   @IsOptional()
