@@ -24,6 +24,7 @@ import { AuthUserMiddleware } from './auth/user/auth-user.middleware';
 import { SlogansModule } from './slogans/slogans.module';
 import { EmailsModule } from './emails/emails.module';
 import { UserAddressesModule } from './user-addresses/user-addresses.module';
+import { BannersModule } from './banners/banners.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { UserAddressesModule } from './user-addresses/user-addresses.module';
     SlogansModule,
     EmailsModule,
     UserAddressesModule,
+    BannersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
