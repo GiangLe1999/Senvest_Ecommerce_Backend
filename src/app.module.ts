@@ -25,6 +25,7 @@ import { SlogansModule } from './slogans/slogans.module';
 import { EmailsModule } from './emails/emails.module';
 import { UserAddressesModule } from './user-addresses/user-addresses.module';
 import { BannersModule } from './banners/banners.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -77,6 +78,7 @@ import { BannersModule } from './banners/banners.module';
     EmailsModule,
     UserAddressesModule,
     BannersModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -144,10 +144,10 @@ export class AdminProductsService {
         },
         variants,
       });
-      newProduct.save();
+      await newProduct.save();
 
       category.products.push(newProduct._id);
-      category.save();
+      await category.save();
 
       return {
         ok: true,
@@ -238,7 +238,9 @@ export class AdminProductsService {
 
         updateObj = {
           ...updateObj,
-          category: updateProductInput?.category || product.category._id,
+          category:
+            new Types.ObjectId(updateProductInput?.category) ||
+            new Types.ObjectId(product.category._id),
         };
       }
 
@@ -261,7 +263,10 @@ export class AdminProductsService {
 
         updateObj = {
           ...updateObj,
-          variants: updateProductInput?.variants || product.variants,
+          variants:
+            updateProductInput?.variants.map(
+              (variant) => new Types.ObjectId(variant),
+            ) || product.variants.map((variant) => new Types.ObjectId(variant)),
         };
       }
 
