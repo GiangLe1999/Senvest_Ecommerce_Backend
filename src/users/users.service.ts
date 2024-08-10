@@ -273,7 +273,7 @@ export class UsersService {
     await this.emailsService.sendResetPasswordEmail({
       email,
       emailLink: `mailto:${email}`,
-      link: `${this.config.get('APP_FRONTEND_URL')}/${locale}/reset-password?token=${resetPasswordToken}`,
+      link: `${this.config.get('APP_FRONTEND_URL')}/${locale}/reset-password/${resetPasswordToken}`,
     });
 
     return {

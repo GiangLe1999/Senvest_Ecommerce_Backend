@@ -42,7 +42,7 @@ export class EmailsService {
   ): Promise<SendResetPasswordEmailOutput> {
     try {
       const { email, emailLink, link } = sendResetPasswordEmailInput;
-      const subject = 'Verify your email address';
+      const subject = 'Reset your password';
 
       await this.mailerService.sendMail({
         to: email,

@@ -23,6 +23,7 @@ import { UsersModule } from './users/users.module';
 import { AuthUserMiddleware } from './auth/user/auth-user.middleware';
 import { SlogansModule } from './slogans/slogans.module';
 import { EmailsModule } from './emails/emails.module';
+import { UserAddressesModule } from './user-addresses/user-addresses.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { EmailsModule } from './emails/emails.module';
     UsersModule,
     SlogansModule,
     EmailsModule,
+    UserAddressesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
