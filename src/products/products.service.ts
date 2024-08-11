@@ -13,7 +13,7 @@ export class ProductsService {
   async getHomepageProducts(): Promise<GetProductsOutput> {
     const products = await this.productModel
       .find()
-      .select('name slug rating')
+      .select('name slug description')
       .limit(10)
       .sort({ createdAt: -1 })
       .populate({
