@@ -7,7 +7,7 @@ import {
   Payment,
   PaymentDocument,
   StatusEnum,
-} from 'src/schemas/payment.schema';
+} from '../schemas/payment.schema';
 import { CreatePaymentLinkInput } from './dtos/create-payment-link.dto';
 import { generateOrderCode } from './utils/check-validate';
 

@@ -1,5 +1,5 @@
 import { IsNumber, IsString } from 'class-validator';
-import { CoreOutput } from 'src/common/dtos/output.dto';
+import { CoreOutput } from '../../common/dtos/output.dto';
 
 export class CreatePaymentLinkInput {
   @IsNumber()

@@ -1,6 +1,6 @@
 import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
 import { PaymentsService } from './payments.service';
-import { AuthUser } from 'src/auth/user/auth-user.decorator';
+import { AuthUser } from '../auth/user/auth-user.decorator';
 import { CreatePaymentLinkInput } from './dtos/create-payment-link.dto';
 import { Response } from 'express';
 
