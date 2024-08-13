@@ -26,6 +26,7 @@ import { EmailsModule } from './emails/emails.module';
 import { UserAddressesModule } from './user-addresses/user-addresses.module';
 import { BannersModule } from './banners/banners.module';
 import { ProductsModule } from './products/products.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -40,21 +41,28 @@ import { ProductsModule } from './products/products.module';
         APP_DASHBOARD_URL: Joi.string().required(),
         APP_NAME: Joi.string().required(),
         PORT: Joi.string().required(),
+        // Auth
         ACCESS_TOKEN_KEY: Joi.string().required(),
         SECRET_TOKEN_KEY: Joi.string().required(),
         ACCESS_TOKEN_EXPIRES_IN: Joi.string().required(),
         RESET_PASSWORD_TOKEN_KEY: Joi.string().required(),
         OTP_AUTH_SECRET: Joi.string().required(),
+        // Cloudinary
         CLOUDINARY_CLOUD_NAME: Joi.string().required(),
         CLOUDINARY_API_KEY: Joi.string().required(),
         CLOUDINARY_API_SECRET: Joi.string().required(),
         CLOUDINARY_FOLDER: Joi.string().required(),
+        // Email
         EMAIL_HOST: Joi.string().required(),
         EMAIL_PORT: Joi.number().required(),
         EMAIL_USERNAME: Joi.string().required(),
         EMAIL_PASSWORD: Joi.string().required(),
         EMAIL_FROM_ADDRESS: Joi.string().required(),
         EMAIL_FROM_NAME: Joi.string().required(),
+        // PayOS
+        PAYOS_CLIENT_ID: Joi.string().required(),
+        PAYOS_API_KEY: Joi.string().required(),
+        PAYOS_CHECKSUM_KEY: Joi.string().required(),
       }),
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
@@ -79,6 +87,7 @@ import { ProductsModule } from './products/products.module';
     UserAddressesModule,
     BannersModule,
     ProductsModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

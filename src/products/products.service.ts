@@ -19,8 +19,7 @@ export class ProductsService {
       .populate({
         path: 'variants',
         model: 'Variant',
-        select:
-          'fragrance price discountedPrice discountedFrom discountedTo images',
+        select: 'fragrance price discountedPrice images stock',
       });
     return {
       ok: true,
