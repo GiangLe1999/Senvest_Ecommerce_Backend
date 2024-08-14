@@ -5,6 +5,8 @@ import { Payment, PaymentSchema } from '../schemas/payment.schema';
 import { PaymentsController } from './payments.controller';
 import { PaymentsService } from './payments.service';
 import { PayOSProvider } from './payments.provider';
+import { Product, ProductSchema } from '../schemas/product.schema';
+import { UserAddress, UserAddressSchema } from '../schemas/user-address.schema';
 
 @Module({
   imports: [
@@ -13,6 +15,14 @@ import { PayOSProvider } from './payments.provider';
       {
         name: Payment.name,
         schema: PaymentSchema,
+      },
+      {
+        name: Product.name,
+        schema: ProductSchema,
+      },
+      {
+        name: UserAddress.name,
+        schema: UserAddressSchema,
       },
     ]),
   ],

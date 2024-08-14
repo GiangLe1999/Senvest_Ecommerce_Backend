@@ -1,10 +1,17 @@
-import { Body, Controller, HttpStatus, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  NotFoundException,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { PaymentsService } from './payments.service';
 import { AuthUser } from '../auth/user/auth-user.decorator';
 import { CreatePaymentLinkInput } from './dtos/create-payment-link.dto';
 import { Response } from 'express';
 
-@Controller('payments')
+@Controller('users/payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
@@ -18,13 +25,17 @@ export class PaymentsController {
       res.status(HttpStatus.CREATED).json(
         await this.paymentsService.createPaymentLink({
           ...createPaymentLinkInput,
-          user_id: user._id || null,
+          user: user || null,
         }),
       );
     } catch (error) {
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ ok: false, error: error.message });
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
     }
   }
 }

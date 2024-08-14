@@ -16,7 +16,7 @@ export class Item {
     ref: 'Product',
     required: true,
   })
-  product_id: mongoose.Schema.Types.ObjectId;
+  _id: mongoose.Schema.Types.ObjectId;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Variant' })
   variant_id: mongoose.Schema.Types.ObjectId;
