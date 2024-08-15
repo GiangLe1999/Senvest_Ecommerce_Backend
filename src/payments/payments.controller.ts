@@ -13,7 +13,7 @@ import { AuthUser } from '../auth/user/auth-user.decorator';
 import { CreatePaymentLinkInput } from './dtos/create-payment-link.dto';
 import { Response } from 'express';
 import { CancelPaymentLinkInput } from './dtos/cancel-payment-link.dto';
-import { UserDocument } from 'src/schemas/user.schema';
+import { UserDocument } from '../schemas/user.schema';
 
 @Controller('users/payments')
 export class PaymentsController {
@@ -90,11 +90,18 @@ export class PaymentsController {
   }
 
   @Post('receive-webhook')
-  async receiveWebhook(@Body() data, @Res() res: Response) {
+  async receiveWebhook(
+    @Body() data,
+    @Res() res: Response,
+    @AuthUser() user: UserDocument,
+  ) {
     try {
-      res
-        .status(HttpStatus.OK)
-        .json(await this.paymentsService.receiveWebhook(data));
+      res.status(HttpStatus.OK).json(
+        await this.paymentsService.receiveWebhook({
+          ...data,
+          user: user || null,
+        }),
+      );
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());

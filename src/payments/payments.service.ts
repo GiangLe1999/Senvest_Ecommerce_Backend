@@ -22,9 +22,12 @@ import {
   CancelPaymentLinkInput,
   CancelPaymentLinkOutput,
 } from './dtos/cancel-payment-link.dto';
-import { CoreOutput } from 'src/common/dtos/output.dto';
+import { CoreOutput } from '../common/dtos/output.dto';
 import { ReceiveWebhookOutput } from './dtos/receive-webhook.dto';
-import { Variant, VariantDocument } from 'src/schemas/variant.schema';
+import { Variant, VariantDocument } from '../schemas/variant.schema';
+import { formatCurrencyVND } from './utils/format-currency-vnd';
+import { EmailsService } from 'src/emails/emails.service';
+import { formatDate } from './utils/format-date';
 
 @Injectable()
 export class PaymentsService {
@@ -36,6 +39,7 @@ export class PaymentsService {
     @InjectModel(UserAddress.name)
     private userAddressesModel: Model<ProductDocument>,
     private configService: ConfigService,
+    private readonly emailsService: EmailsService,
   ) {}
 
   async createPaymentLink(
@@ -250,12 +254,14 @@ export class PaymentsService {
       payment.transactionDateTime = new Date(data?.data?.transactionDateTime);
       await payment.save();
 
+      const sendEmailItems = [];
+
       for (const product of payment.items) {
         const dbProduct = await this.productsModel
           .findOne({
             _id: product._id,
           })
-          .select('totalSales totalQuantitySold');
+          .select('name totalSales totalQuantitySold');
 
         if (!dbProduct) {
           throw new NotFoundException({
@@ -266,7 +272,7 @@ export class PaymentsService {
 
         const dbVariant = await this.variantsModel
           .findById(product.variant_id)
-          .select('stock price discountedPrice');
+          .select('fragrance stock price discountedPrice images');
 
         if (!dbVariant) {
           throw new NotFoundException({
@@ -294,7 +300,48 @@ export class PaymentsService {
 
         dbVariant.stock = (dbVariantStock - product.quantity).toString();
         await dbVariant.save();
+
+        sendEmailItems.push({
+          image: dbVariant.images[0],
+          name: dbProduct.name.vi,
+          scent: dbVariant.fragrance,
+          price: formatCurrencyVND(dbVariantPrice),
+          quantity: product.quantity,
+          product_total_price: formatCurrencyVND(
+            dbVariantPrice * product.quantity,
+          ),
+        });
       }
+
+      const user_address = {
+        name: '',
+        address: '',
+        city: '',
+        province: '',
+        zip: '',
+        phone: '',
+      };
+
+      if (payment?.not_user_info) {
+        user_address.name = payment?.not_user_info?.name;
+        user_address.address = payment?.not_user_info?.address;
+        user_address.city = payment?.not_user_info?.city;
+        user_address.province = payment?.not_user_info?.province;
+        user_address.zip = payment?.not_user_info?.zip;
+        user_address.phone = payment?.not_user_info?.phone;
+      }
+
+      await this.emailsService.sendSuccessfulPaymentEmail({
+        email: data?.user?.email || payment?.not_user_info?.email,
+        items: sendEmailItems,
+        sub_total: formatCurrencyVND(payment.amount),
+        shipping: formatCurrencyVND(0),
+        tax: formatCurrencyVND(0),
+        total: formatCurrencyVND(payment.amount),
+        order_code: payment.orderCode.toString(),
+        created_at: formatDate(payment.transactionDateTime),
+        ...user_address,
+      });
 
       return { ok: true };
     } else {

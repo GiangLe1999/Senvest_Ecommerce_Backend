@@ -8,6 +8,10 @@ import {
   SendResetPasswordEmailInput,
   SendResetPasswordEmailOutput,
 } from './dtos/send-reset-password-email.dto';
+import {
+  SendSuccessfulPaymentEmailInput,
+  SendSuccessfulPaymentEmailOutput,
+} from './dtos/send-successful-payment-email.dto';
 
 @Injectable()
 export class EmailsService {
@@ -60,6 +64,27 @@ export class EmailsService {
       };
     } catch (error) {
       throw new InternalServerErrorException(error);
+    }
+  }
+
+  async sendSuccessfulPaymentEmail(
+    sendSuccessfulPaymentEmailInput: SendSuccessfulPaymentEmailInput,
+  ): Promise<SendSuccessfulPaymentEmailOutput> {
+    try {
+      const subject = 'Thank you for ordering!';
+
+      await this.mailerService.sendMail({
+        to: sendSuccessfulPaymentEmailInput.email,
+        subject,
+        template: './successful-payment-email',
+        context: sendSuccessfulPaymentEmailInput,
+      });
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      console.log(error);
     }
   }
 }
