@@ -7,6 +7,7 @@ import { PaymentsService } from './payments.service';
 import { PayOSProvider } from './payments.provider';
 import { Product, ProductSchema } from '../schemas/product.schema';
 import { UserAddress, UserAddressSchema } from '../schemas/user-address.schema';
+import { Variant, VariantSchema } from 'src/schemas/variant.schema';
 
 @Module({
   imports: [
@@ -23,6 +24,10 @@ import { UserAddress, UserAddressSchema } from '../schemas/user-address.schema';
       {
         name: UserAddress.name,
         schema: UserAddressSchema,
+      },
+      {
+        name: Variant.name,
+        schema: VariantSchema,
       },
     ]),
   ],

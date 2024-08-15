@@ -75,6 +75,9 @@ export class Payment {
 
   @Prop({ type: NotUserInfoSchema })
   not_user_info?: NotUserInfo;
+
+  @Prop({ type: Date })
+  transactionDateTime: Date;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

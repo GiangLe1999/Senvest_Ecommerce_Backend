@@ -1,18 +1,30 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import PayOS from '@payos/node';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Payment,
   PaymentDocument,
   StatusEnum,
 } from '../schemas/payment.schema';
 import { CreatePaymentLinkInput } from './dtos/create-payment-link.dto';
-import { generateOrderCode } from './utils/check-validate';
+import { generateOrderCode, isValidData } from './utils/check-validate';
 import { UserDocument } from '../schemas/user.schema';
 import { Product, ProductDocument } from '../schemas/product.schema';
 import { UserAddress } from '../schemas/user-address.schema';
+import {
+  CancelPaymentLinkInput,
+  CancelPaymentLinkOutput,
+} from './dtos/cancel-payment-link.dto';
+import { CoreOutput } from 'src/common/dtos/output.dto';
+import { ReceiveWebhookOutput } from './dtos/receive-webhook.dto';
+import { Variant, VariantDocument } from 'src/schemas/variant.schema';
 
 @Injectable()
 export class PaymentsService {
@@ -20,6 +32,7 @@ export class PaymentsService {
     @Inject('PAYOS') private readonly payOS: PayOS,
     @InjectModel(Payment.name) private paymentsModel: Model<PaymentDocument>,
     @InjectModel(Product.name) private productsModel: Model<ProductDocument>,
+    @InjectModel(Variant.name) private variantsModel: Model<VariantDocument>,
     @InjectModel(UserAddress.name)
     private userAddressesModel: Model<ProductDocument>,
     private configService: ConfigService,
@@ -64,7 +77,7 @@ export class PaymentsService {
         }
 
         if (item.quantity > variant?.stock) {
-          throw new NotFoundException({
+          throw new BadRequestException({
             ok: false,
             error: 'Insufficient stock',
           });
@@ -121,7 +134,7 @@ export class PaymentsService {
     );
 
     if (createPaymentLinkInput?.amount !== doubleCheckAmount) {
-      throw new NotFoundException({
+      throw new BadRequestException({
         ok: false,
         error: 'Amount does not match',
       });
@@ -171,5 +184,124 @@ export class PaymentsService {
         currency: paymentLinkResponse?.currency,
       },
     };
+  }
+
+  async cancelPaymentLink(
+    cancelPaymentLinkInput: CancelPaymentLinkInput & {
+      user_id: Types.ObjectId;
+    },
+  ): Promise<CancelPaymentLinkOutput> {
+    const payment = await this.paymentsModel.findOneAndUpdate(
+      {
+        orderCode: cancelPaymentLinkInput.orderCode,
+        status: StatusEnum.pending,
+        user: cancelPaymentLinkInput.user_id,
+      },
+      { status: StatusEnum.cancelled },
+    );
+    if (!payment) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Payment does not exist',
+      });
+    }
+
+    const order = await this.payOS.cancelPaymentLink(
+      cancelPaymentLinkInput.order_id,
+      cancelPaymentLinkInput.cancellation_reason,
+    );
+    if (!order) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Order does not exist',
+      });
+    }
+    return {
+      ok: true,
+    };
+  }
+
+  async confirmWebhook(webhook_url: string): Promise<CoreOutput> {
+    await this.payOS.confirmWebhook(webhook_url);
+    return { ok: true };
+  }
+
+  async receiveWebhook(data: any): Promise<ReceiveWebhookOutput> {
+    if (
+      isValidData(
+        data?.data,
+        data?.signature,
+        this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
+      )
+    ) {
+      const payment = await this.paymentsModel.findOne({
+        orderCode: data?.data?.orderCode,
+        status: StatusEnum.pending,
+      });
+
+      if (!payment) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Payment does not exist',
+        });
+      }
+
+      payment.status = StatusEnum.paid;
+      payment.transactionDateTime = new Date(data?.data?.transactionDateTime);
+      await payment.save();
+
+      for (const product of payment.items) {
+        const dbProduct = await this.productsModel
+          .findOne({
+            _id: product._id,
+          })
+          .select('totalSales totalQuantitySold');
+
+        if (!dbProduct) {
+          throw new NotFoundException({
+            ok: false,
+            error: 'Product does not exist',
+          });
+        }
+
+        const dbVariant = await this.variantsModel
+          .findById(product.variant_id)
+          .select('stock price discountedPrice');
+
+        if (!dbVariant) {
+          throw new NotFoundException({
+            ok: false,
+            error: 'Variant does not exist',
+          });
+        }
+
+        const dbVariantPrice =
+          dbVariant?.discountedPrice && dbVariant?.discountedPrice != '0'
+            ? parseFloat(dbVariant?.discountedPrice)
+            : parseFloat(dbVariant?.price);
+
+        dbProduct.totalSales += dbVariantPrice * product.quantity;
+        dbProduct.totalQuantitySold += product.quantity;
+        await dbProduct.save();
+
+        const dbVariantStock = parseInt(dbVariant.stock);
+        if (dbVariantStock < product.quantity) {
+          throw new BadRequestException({
+            ok: false,
+            error: 'Variant stock is not enough',
+          });
+        }
+
+        dbVariant.stock = (dbVariantStock - product.quantity).toString();
+        await dbVariant.save();
+      }
+
+      return { ok: true };
+    } else {
+      throw new BadRequestException({
+        ok: false,
+        error: 'The data does not match the signature',
+      });
+    }
   }
 }
