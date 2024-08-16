@@ -57,6 +57,10 @@ export class PaymentsService {
     }
   }
 
+  async getPaymentByOrderCode(orderCode: string): Promise<PaymentDocument> {
+    return await this.paymentsModel.findOne({ orderCode });
+  }
+
   async createPaymentLink(
     createPaymentLinkInput: CreatePaymentLinkInput & {
       user?: UserDocument;
@@ -244,6 +248,23 @@ export class PaymentsService {
   }
 
   async receiveWebhook(data: any): Promise<ReceiveWebhookOutput> {
+    const payment: any = await this.paymentsModel
+      .findOne({
+        orderCode: data?.data?.orderCode,
+        status: StatusEnum.pending,
+      })
+      .populate({
+        path: 'user_address',
+        model: UserAddress.name,
+      });
+
+    if (!payment) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Payment does not exist',
+      });
+    }
+
     if (
       isValidData(
         data?.data,
@@ -251,23 +272,6 @@ export class PaymentsService {
         this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
       )
     ) {
-      const payment: any = await this.paymentsModel
-        .findOne({
-          orderCode: data?.data?.orderCode,
-          status: StatusEnum.pending,
-        })
-        .populate({
-          path: 'user_address',
-          model: UserAddress.name,
-        });
-
-      if (!payment) {
-        throw new NotFoundException({
-          ok: false,
-          error: 'Payment does not exist',
-        });
-      }
-
       payment.status = StatusEnum.paid;
       payment.transactionDateTime = new Date(data?.data?.transactionDateTime);
       await payment.save();
@@ -282,6 +286,9 @@ export class PaymentsService {
           .select('name totalSales totalQuantitySold');
 
         if (!dbProduct) {
+          payment.status = StatusEnum.cancelled;
+          await payment.save();
+
           throw new NotFoundException({
             ok: false,
             error: 'Product does not exist',
@@ -295,6 +302,8 @@ export class PaymentsService {
           );
 
         if (!dbVariant) {
+          payment.status = StatusEnum.cancelled;
+          await payment.save();
           throw new NotFoundException({
             ok: false,
             error: 'Variant does not exist',
@@ -309,6 +318,8 @@ export class PaymentsService {
 
         const dbVariantStock = parseInt(dbVariant.stock);
         if (dbVariantStock < product.quantity) {
+          payment.status = StatusEnum.cancelled;
+          await payment.save();
           throw new BadRequestException({
             ok: false,
             error: 'Variant stock is not enough',
@@ -357,6 +368,8 @@ export class PaymentsService {
           })
           .select('email');
         if (!user) {
+          payment.status = StatusEnum.cancelled;
+          await payment.save();
           throw new NotFoundException({
             ok: false,
             error: 'User does not exist',
@@ -384,6 +397,9 @@ export class PaymentsService {
 
       return { ok: true };
     } else {
+      payment.status = StatusEnum.cancelled;
+      await payment.save();
+
       throw new BadRequestException({
         ok: false,
         error: 'The data does not match the signature',
