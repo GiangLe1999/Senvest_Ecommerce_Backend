@@ -15,7 +15,7 @@ import {
 } from '../schemas/payment.schema';
 import { CreatePaymentLinkInput } from './dtos/create-payment-link.dto';
 import { generateOrderCode, isValidData } from './utils/check-validate';
-import { UserDocument } from '../schemas/user.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 import { Product, ProductDocument } from '../schemas/product.schema';
 import { UserAddress } from '../schemas/user-address.schema';
 import {
@@ -26,7 +26,7 @@ import { CoreOutput } from '../common/dtos/output.dto';
 import { ReceiveWebhookOutput } from './dtos/receive-webhook.dto';
 import { Variant, VariantDocument } from '../schemas/variant.schema';
 import { formatCurrencyVND } from './utils/format-currency-vnd';
-import { EmailsService } from 'src/emails/emails.service';
+import { EmailsService } from '../emails/emails.service';
 import { formatDate } from './utils/format-date';
 
 @Injectable()
@@ -36,11 +36,26 @@ export class PaymentsService {
     @InjectModel(Payment.name) private paymentsModel: Model<PaymentDocument>,
     @InjectModel(Product.name) private productsModel: Model<ProductDocument>,
     @InjectModel(Variant.name) private variantsModel: Model<VariantDocument>,
+    @InjectModel(User.name) private usersModel: Model<UserDocument>,
     @InjectModel(UserAddress.name)
     private userAddressesModel: Model<ProductDocument>,
     private configService: ConfigService,
     private readonly emailsService: EmailsService,
   ) {}
+
+  private getPriceForVariant(variant: VariantDocument): number {
+    const now = new Date();
+
+    if (
+      variant?.discountedPrice &&
+      now >= variant.discountedFrom &&
+      now <= variant.discountedTo
+    ) {
+      return parseFloat(variant?.discountedPrice);
+    } else {
+      return parseFloat(variant?.price);
+    }
+  }
 
   async createPaymentLink(
     createPaymentLinkInput: CreatePaymentLinkInput & {
@@ -58,7 +73,8 @@ export class PaymentsService {
           .populate({
             path: 'variants',
             model: 'Variant',
-            select: 'price discountedPrice fragrance stock',
+            select:
+              'price discountedPrice fragrance stock discountedFrom discountedTo',
           })
           .lean();
 
@@ -93,10 +109,7 @@ export class PaymentsService {
             ' - ' +
             variant?.fragrance,
           quantity: item.quantity,
-          price:
-            variant?.discountedPrice && variant?.discountedPrice != 0
-              ? parseFloat(variant?.discountedPrice)
-              : parseFloat(variant?.price),
+          price: this.getPriceForVariant(variant),
         };
       }),
     );
@@ -238,10 +251,15 @@ export class PaymentsService {
         this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
       )
     ) {
-      const payment = await this.paymentsModel.findOne({
-        orderCode: data?.data?.orderCode,
-        status: StatusEnum.pending,
-      });
+      const payment: any = await this.paymentsModel
+        .findOne({
+          orderCode: data?.data?.orderCode,
+          status: StatusEnum.pending,
+        })
+        .populate({
+          path: 'user_address',
+          model: UserAddress.name,
+        });
 
       if (!payment) {
         throw new NotFoundException({
@@ -272,7 +290,9 @@ export class PaymentsService {
 
         const dbVariant = await this.variantsModel
           .findById(product.variant_id)
-          .select('fragrance stock price discountedPrice images');
+          .select(
+            'fragrance stock price discountedPrice discountedFrom discountedTo images',
+          );
 
         if (!dbVariant) {
           throw new NotFoundException({
@@ -281,10 +301,7 @@ export class PaymentsService {
           });
         }
 
-        const dbVariantPrice =
-          dbVariant?.discountedPrice && dbVariant?.discountedPrice != '0'
-            ? parseFloat(dbVariant?.discountedPrice)
-            : parseFloat(dbVariant?.price);
+        const dbVariantPrice = this.getPriceForVariant(dbVariant);
 
         dbProduct.totalSales += dbVariantPrice * product.quantity;
         dbProduct.totalQuantitySold += product.quantity;
@@ -314,6 +331,7 @@ export class PaymentsService {
       }
 
       const user_address = {
+        email: '',
         name: '',
         address: '',
         city: '',
@@ -323,6 +341,7 @@ export class PaymentsService {
       };
 
       if (payment?.not_user_info) {
+        user_address.email = payment?.not_user_info?.email;
         user_address.name = payment?.not_user_info?.name;
         user_address.address = payment?.not_user_info?.address;
         user_address.city = payment?.not_user_info?.city;
@@ -331,8 +350,28 @@ export class PaymentsService {
         user_address.phone = payment?.not_user_info?.phone;
       }
 
+      if (payment?.user_address) {
+        const user = await this.usersModel
+          .findOne({
+            _id: payment?.user_address?.user,
+          })
+          .select('email');
+        if (!user) {
+          throw new NotFoundException({
+            ok: false,
+            error: 'User does not exist',
+          });
+        }
+        user_address.email = user.email;
+        user_address.name = payment?.user_address?.name;
+        user_address.address = payment?.user_address?.address;
+        user_address.city = payment?.user_address?.city;
+        user_address.province = payment?.user_address?.province;
+        user_address.zip = payment?.user_address?.zip;
+        user_address.phone = payment?.user_address?.phone;
+      }
+
       await this.emailsService.sendSuccessfulPaymentEmail({
-        email: data?.user?.email || payment?.not_user_info?.email,
         items: sendEmailItems,
         sub_total: formatCurrencyVND(payment.amount),
         shipping: formatCurrencyVND(0),

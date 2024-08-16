@@ -27,6 +27,8 @@ import { UserAddressesModule } from './user-addresses/user-addresses.module';
 import { BannersModule } from './banners/banners.module';
 import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -88,6 +90,8 @@ import { PaymentsModule } from './payments/payments.module';
     BannersModule,
     ProductsModule,
     PaymentsModule,
+    ScheduleModule.forRoot(),
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

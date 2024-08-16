@@ -90,18 +90,11 @@ export class PaymentsController {
   }
 
   @Post('receive-webhook')
-  async receiveWebhook(
-    @Body() data,
-    @Res() res: Response,
-    @AuthUser() user: UserDocument,
-  ) {
+  async receiveWebhook(@Body() data, @Res() res: Response) {
     try {
-      res.status(HttpStatus.OK).json(
-        await this.paymentsService.receiveWebhook({
-          ...data,
-          user: user || null,
-        }),
-      );
+      res
+        .status(HttpStatus.OK)
+        .json(await this.paymentsService.receiveWebhook(data));
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());

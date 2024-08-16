@@ -8,6 +8,7 @@ import { PayOSProvider } from './payments.provider';
 import { Product, ProductSchema } from '../schemas/product.schema';
 import { UserAddress, UserAddressSchema } from '../schemas/user-address.schema';
 import { Variant, VariantSchema } from '../schemas/variant.schema';
+import { User, UserSchema } from '../schemas/user.schema';
 
 @Module({
   imports: [
@@ -28,6 +29,10 @@ import { Variant, VariantSchema } from '../schemas/variant.schema';
       {
         name: Variant.name,
         schema: VariantSchema,
+      },
+      {
+        name: User.name,
+        schema: UserSchema,
       },
     ]),
   ],
