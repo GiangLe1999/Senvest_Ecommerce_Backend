@@ -28,6 +28,7 @@ import { Variant, VariantDocument } from '../schemas/variant.schema';
 import { formatCurrencyVND } from './utils/format-currency-vnd';
 import { EmailsService } from '../emails/emails.service';
 import { formatDate } from './utils/format-date';
+import { PusherService } from '../pusher/pusher.service';
 
 @Injectable()
 export class PaymentsService {
@@ -40,6 +41,7 @@ export class PaymentsService {
     @InjectModel(UserAddress.name)
     private userAddressesModel: Model<ProductDocument>,
     private configService: ConfigService,
+    private pusherService: PusherService,
     private readonly emailsService: EmailsService,
   ) {}
 
@@ -383,6 +385,15 @@ export class PaymentsService {
         user_address.zip = payment?.user_address?.zip;
         user_address.phone = payment?.user_address?.phone;
       }
+
+      await this.pusherService.trigger('payment', 'new-payment', {
+        name: user_address.name,
+        phone: user_address.phone,
+        address: user_address.address,
+        city: user_address.city,
+        image: sendEmailItems[0].image,
+        total: formatCurrencyVND(payment.amount),
+      });
 
       await this.emailsService.sendSuccessfulPaymentEmail({
         items: sendEmailItems,

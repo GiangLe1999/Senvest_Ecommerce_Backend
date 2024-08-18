@@ -9,10 +9,12 @@ import { Product, ProductSchema } from '../schemas/product.schema';
 import { UserAddress, UserAddressSchema } from '../schemas/user-address.schema';
 import { Variant, VariantSchema } from '../schemas/variant.schema';
 import { User, UserSchema } from '../schemas/user.schema';
+import { PusherModule } from '../pusher/pusher.module';
 
 @Module({
   imports: [
     ConfigModule,
+    PusherModule,
     MongooseModule.forFeature([
       {
         name: Payment.name,

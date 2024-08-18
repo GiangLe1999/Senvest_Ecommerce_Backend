@@ -29,6 +29,7 @@ import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
+import { PusherModule } from './pusher/pusher.module';
 
 @Module({
   imports: [
@@ -65,6 +66,11 @@ import { TasksModule } from './tasks/tasks.module';
         PAYOS_CLIENT_ID: Joi.string().required(),
         PAYOS_API_KEY: Joi.string().required(),
         PAYOS_CHECKSUM_KEY: Joi.string().required(),
+        // PUSHER
+        PUSHER_APP_ID: Joi.string().required(),
+        PUSHER_KEY: Joi.string().required(),
+        PUSHER_SECRET: Joi.string().required(),
+        PUSHER_CLUSTER: Joi.string().required(),
       }),
     }),
     MongooseModule.forRoot(process.env.MONGODB_URI),
@@ -92,6 +98,7 @@ import { TasksModule } from './tasks/tasks.module';
     PaymentsModule,
     ScheduleModule.forRoot(),
     TasksModule,
+    PusherModule,
   ],
   controllers: [AppController],
   providers: [AppService],
