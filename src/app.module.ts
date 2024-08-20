@@ -30,6 +30,7 @@ import { PaymentsModule } from './payments/payments.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
 import { PusherModule } from './pusher/pusher.module';
+import { UserWishlistModule } from './user-wishlist/user-wishlist.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { PusherModule } from './pusher/pusher.module';
     ScheduleModule.forRoot(),
     TasksModule,
     PusherModule,
+    UserWishlistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

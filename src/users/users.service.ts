@@ -37,6 +37,7 @@ import {
   UserUpdateProfileInput,
   UserUpdateProfileOutput,
 } from './dtos/user-update-profile.dto';
+import { UserWishlistService } from '../user-wishlist/user-wishlist.service';
 
 @Injectable()
 export class UsersService {
@@ -47,6 +48,7 @@ export class UsersService {
     private readonly authService: AuthService,
     private readonly emailsService: EmailsService,
     private readonly config: ConfigService,
+    private readonly userWishlistService: UserWishlistService,
   ) {}
 
   async findUserById(_id: string): Promise<UserDocument> {
@@ -85,6 +87,8 @@ export class UsersService {
       to: newUser.email,
       otp,
     });
+
+    await this.userWishlistService.createUserWishlist(newUser._id);
 
     return { ok: true };
   }
