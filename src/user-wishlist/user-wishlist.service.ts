@@ -24,9 +24,34 @@ export class UserWishlistService {
   ) {}
 
   async getUserWishlist(user: Types.ObjectId): Promise<GetUserWishlistOutput> {
-    const wishlist = await this.userWishlistModel.findOne({
-      user,
+    const wishlist = await this.userWishlistModel.findOne({ user }).populate({
+      path: 'items',
+      populate: [
+        {
+          path: '_id',
+          model: 'Product',
+          select: 'name slug',
+        },
+        {
+          path: 'variant_id',
+          model: 'Variant',
+          select:
+            'fragrance price discountedPrice discountedFrom discountedTo images stock',
+        },
+      ],
     });
+
+    const priorityMap = {
+      high: 1,
+      medium: 2,
+      low: 3,
+    };
+
+    if (wishlist && wishlist.items) {
+      wishlist.items.sort(
+        (a, b) => priorityMap[a.priority] - priorityMap[b.priority],
+      );
+    }
 
     return { ok: true, wishlist };
   }
