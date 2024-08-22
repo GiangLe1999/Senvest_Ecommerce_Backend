@@ -158,6 +158,27 @@ export class AdminProductsController {
     }
   }
 
+  @Put('delete-videos')
+  @UseGuards(AuthAdminGuard)
+  async removeProductVideos(
+    @Res() res: Response,
+    @Body() body: { _id: string },
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.adminProductsService.removeProductVideos(body._id));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
+      }
+    }
+  }
+
   @Delete('delete/:id')
   @UseGuards(AuthAdminGuard)
   async deleteProduct(@Res() res: Response, @Param('id') id: string) {

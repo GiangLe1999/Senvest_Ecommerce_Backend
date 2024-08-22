@@ -347,6 +347,33 @@ export class AdminProductsService {
     }
   }
 
+  async removeProductVideos(_id: string): Promise<CoreOutput> {
+    try {
+      const product = await this.findProductById(_id);
+      if (!product) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Product does not exist',
+        });
+      }
+
+      if (product?.videos.length) {
+        await this.cloudinaryService.deleteVideos(product.videos as any);
+      }
+
+      product.videos = [];
+      await product.save();
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException({
+        ok: false,
+        error: error.message,
+      });
+    }
+  }
+
   async deleteProduct(_id: string): Promise<CoreOutput> {
     try {
       const product = await this.findProductById(_id);
