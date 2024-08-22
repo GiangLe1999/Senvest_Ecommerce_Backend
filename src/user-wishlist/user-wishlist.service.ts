@@ -56,6 +56,14 @@ export class UserWishlistService {
     return { ok: true, wishlist };
   }
 
+  async getUserWishlistLength(
+    user: Types.ObjectId,
+  ): Promise<{ ok: boolean; wishlistLength: number }> {
+    const wishlist = await this.userWishlistModel.findOne({ user }).lean();
+
+    return { ok: true, wishlistLength: wishlist.items.length };
+  }
+
   async createUserWishlist(user: Types.ObjectId) {
     await this.userWishlistModel.create({ user });
     return { ok: true };

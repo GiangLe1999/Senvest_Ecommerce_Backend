@@ -35,6 +35,23 @@ export class UserWishlistController {
     }
   }
 
+  @Get('length')
+  @UseGuards(AuthUserGuard)
+  async getUserWishlistLength(
+    @AuthUser() user: UserDocument,
+    @Res() res: Response,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.userWishlistService.getUserWishlistLength(user._id));
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
   @Put('add-new')
   @UseGuards(AuthUserGuard)
   async addNewProductToWishlist(

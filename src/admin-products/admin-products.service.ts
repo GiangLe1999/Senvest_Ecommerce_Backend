@@ -244,32 +244,6 @@ export class AdminProductsService {
         };
       }
 
-      if (updateProductInput?.variants) {
-        const oldVariants = product.variants.map((variant) =>
-          variant.toString(),
-        );
-        const newVariants = new Set(updateProductInput.variants);
-        const deletedVariants = oldVariants.filter(
-          (variant) => !newVariants.has(variant),
-        );
-
-        if (deletedVariants?.length) {
-          const deletePromises = deletedVariants.map(async (variant) => {
-            return this.adminVariantService.deleteVariant(variant);
-          });
-
-          await Promise.all(deletePromises);
-        }
-
-        updateObj = {
-          ...updateObj,
-          variants:
-            updateProductInput?.variants.map(
-              (variant) => new Types.ObjectId(variant),
-            ) || product.variants.map((variant) => new Types.ObjectId(variant)),
-        };
-      }
-
       if (updateProductInput?.status) {
         updateObj = {
           ...updateObj,
