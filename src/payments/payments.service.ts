@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import PayOS from '@payos/node';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import {
   Payment,
   PaymentDocument,
@@ -210,15 +210,12 @@ export class PaymentsService {
   }
 
   async cancelPaymentLink(
-    cancelPaymentLinkInput: CancelPaymentLinkInput & {
-      user_id: Types.ObjectId;
-    },
+    cancelPaymentLinkInput: CancelPaymentLinkInput,
   ): Promise<CancelPaymentLinkOutput> {
     const payment = await this.paymentsModel.findOneAndUpdate(
       {
         orderCode: cancelPaymentLinkInput.orderCode,
         status: StatusEnum.pending,
-        user: cancelPaymentLinkInput.user_id,
       },
       { status: StatusEnum.cancelled },
     );
@@ -230,8 +227,8 @@ export class PaymentsService {
     }
 
     const order = await this.payOS.cancelPaymentLink(
-      cancelPaymentLinkInput.order_id,
-      cancelPaymentLinkInput.cancellation_reason,
+      cancelPaymentLinkInput.orderCode,
+      'Khach hang huy thanh toan',
     );
     if (!order) {
       throw new NotFoundException({

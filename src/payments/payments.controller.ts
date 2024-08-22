@@ -53,6 +53,7 @@ export class PaymentsController {
         }),
       );
     } catch (error) {
+      console.log(error);
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
       } else if (error instanceof BadRequestException) {
@@ -72,12 +73,11 @@ export class PaymentsController {
     @Res() res: Response,
   ) {
     try {
-      res.status(HttpStatus.CREATED).json(
-        await this.paymentsService.cancelPaymentLink({
-          ...cancelPaymentLinkInput,
-          user_id: user._id,
-        }),
-      );
+      res
+        .status(HttpStatus.CREATED)
+        .json(
+          await this.paymentsService.cancelPaymentLink(cancelPaymentLinkInput),
+        );
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
