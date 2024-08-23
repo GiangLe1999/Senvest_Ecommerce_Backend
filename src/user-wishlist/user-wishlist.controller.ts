@@ -67,6 +67,7 @@ export class UserWishlistController {
         }),
       );
     } catch (error) {
+      console.log(error);
       if (error instanceof BadRequestException) {
         res.status(HttpStatus.BAD_REQUEST).send(error.getResponse());
       } else {
