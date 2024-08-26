@@ -31,6 +31,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { TasksModule } from './tasks/tasks.module';
 import { PusherModule } from './pusher/pusher.module';
 import { UserWishlistModule } from './user-wishlist/user-wishlist.module';
+import { ReviewsModule } from './reviews/reviews.module';
 
 @Module({
   imports: [
@@ -101,6 +102,7 @@ import { UserWishlistModule } from './user-wishlist/user-wishlist.module';
     TasksModule,
     PusherModule,
     UserWishlistModule,
+    ReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
