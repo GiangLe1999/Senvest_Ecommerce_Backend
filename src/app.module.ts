@@ -32,6 +32,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { PusherModule } from './pusher/pusher.module';
 import { UserWishlistModule } from './user-wishlist/user-wishlist.module';
 import { ReviewsModule } from './reviews/reviews.module';
+import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 
 @Module({
   imports: [
@@ -103,6 +104,7 @@ import { ReviewsModule } from './reviews/reviews.module';
     PusherModule,
     UserWishlistModule,
     ReviewsModule,
+    AdminReviewsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -51,6 +51,9 @@ export class Product {
 
   @Prop({ default: '0' })
   rating: string;
+
+  @Prop({ default: 0 })
+  nums_of_reviews: number;
 }
 
 // This is the actual Mongoose schema created by calling SchemaFactory.createForClass(Product).
