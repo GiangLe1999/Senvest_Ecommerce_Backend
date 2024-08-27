@@ -164,11 +164,18 @@ export class AdminReviewsService {
         });
       }
 
-      product.rating = (
-        (parseFloat(product.rating) * product.nums_of_reviews - review.rating) /
-        (product.nums_of_reviews - 1)
-      ).toFixed(2);
-      product.nums_of_reviews -= 1;
+      if (product.nums_of_reviews === 1) {
+        product.rating = (0).toFixed(2);
+        product.nums_of_reviews = 0;
+        await product.save();
+      } else {
+        product.rating = (
+          (parseFloat(product.rating) * product.nums_of_reviews -
+            review.rating) /
+          (product.nums_of_reviews - 1)
+        ).toFixed(2);
+        product.nums_of_reviews -= 1;
+      }
       await product.save();
     }
 

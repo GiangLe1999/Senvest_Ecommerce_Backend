@@ -23,14 +23,42 @@ export class ReviewsService {
     product_id: string;
     page: number;
     limit: number;
-  }): Promise<{ ok: boolean; reviews: Review[] }> {
+  }): Promise<{ ok: boolean; reviews: Review[]; overview: any }> {
     const reviews = await this.reviewsModel
-      .find({ product: product_id, status: 'Published' })
+      .find({ product: new Types.ObjectId(product_id), status: 'Published' })
+      .populate({
+        path: 'variant',
+        model: 'Variant',
+        select: 'fragrance',
+      })
       .skip((page - 1) * limit)
       .limit(limit)
       .sort({ createdAt: -1 })
       .lean();
-    return { ok: true, reviews };
+
+    const overview = await this.reviewsModel.aggregate([
+      {
+        $match: { product: new Types.ObjectId(product_id) }, // Filter by product_id
+      },
+      {
+        $group: {
+          _id: '$rating', // Group by the 'rating' field
+          value: { $sum: 1 }, // Count the number of documents in each group
+        },
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          rating: '$_id', // Rename _id field to rating
+          value: 1, // Include the value field
+        },
+      },
+      {
+        $sort: { rating: -1 }, // Optional: Sort by rating in descending order
+      },
+    ]);
+
+    return { ok: true, reviews, overview };
   }
 
   async createReview(
