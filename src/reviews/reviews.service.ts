@@ -38,7 +38,10 @@ export class ReviewsService {
 
     const overview = await this.reviewsModel.aggregate([
       {
-        $match: { product: new Types.ObjectId(product_id) }, // Filter by product_id
+        $match: {
+          product: new Types.ObjectId(product_id),
+          status: 'Published',
+        }, // Filter by product_id
       },
       {
         $group: {
