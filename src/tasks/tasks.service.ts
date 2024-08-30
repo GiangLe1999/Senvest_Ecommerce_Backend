@@ -41,20 +41,13 @@ export class TasksService {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   async fetchFrontendURL() {
-    const url = process.env.APP_FRONTEND_URL;
+    const frontend_url = process.env.APP_FRONTEND_URL;
+    const backend_url = process.env.APP_BACKEND_URL;
 
-    if (!url) {
-      console.error(
-        'APP_FRONTEND_URL is not defined in the environment variables.',
-      );
-      return;
-    }
+    await axios.get(frontend_url);
+    console.log(`Successfully fetched ${frontend_url}`);
 
-    try {
-      await axios.get(url);
-      console.log(`Successfully fetched ${url}`);
-    } catch (error) {
-      console.error(`Failed to fetch ${url}:`, error.message);
-    }
+    await axios.get(backend_url);
+    console.log(`Successfully fetched ${backend_url}`);
   }
 }
