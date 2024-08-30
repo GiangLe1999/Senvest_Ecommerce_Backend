@@ -34,6 +34,7 @@ import { UserWishlistModule } from './user-wishlist/user-wishlist.module';
 import { ReviewsModule } from './reviews/reviews.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { QuestionsModule } from './questions/questions.module';
+import { AdminPaymentsModule } from './admin-payments/admin-payments.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { QuestionsModule } from './questions/questions.module';
     ReviewsModule,
     AdminReviewsModule,
     QuestionsModule,
+    AdminPaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

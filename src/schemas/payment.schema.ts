@@ -3,8 +3,9 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 export const enum StatusEnum {
   pending = 'pending',
-  cancelled = 'cancelled',
   paid = 'paid',
+  cancelled = 'cancelled',
+  refunded = 'refunded',
 }
 
 export type PaymentDocument = HydratedDocument<Payment>;
@@ -77,7 +78,7 @@ export class Payment {
   not_user_info?: NotUserInfo;
 
   @Prop({ type: Date })
-  transactionDateTime: Date;
+  transactionDateTime?: Date;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

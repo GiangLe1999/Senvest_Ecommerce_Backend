@@ -3,12 +3,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
 import { Variant, VariantDocument } from '../schemas/variant.schema';
+import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectModel(Variant.name)
     private readonly variantsModel: Model<VariantDocument>,
+    private config: ConfigService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
@@ -36,14 +39,22 @@ export class TasksService {
     console.log('Check and update of discounted prices completed.');
   }
 
-  private getVietnamCurrentDate(): Date {
-    const now = new Date();
+  @Cron(CronExpression.EVERY_5_MINUTES)
+  async fetchFrontendURL() {
+    const url = process.env.APP_FRONTEND_URL;
 
-    // Convert UTC time to Vietnam time (UTC+7)
-    const utcOffset = now.getTimezoneOffset() * 60000; // Timezone offset in milliseconds
-    const vietnamOffset = 7 * 3600000; // Vietnam is UTC+7
+    if (!url) {
+      console.error(
+        'APP_FRONTEND_URL is not defined in the environment variables.',
+      );
+      return;
+    }
 
-    const vietnamTime = new Date(now.getTime() + utcOffset + vietnamOffset);
-    return vietnamTime;
+    try {
+      await axios.get(url);
+      console.log(`Successfully fetched ${url}`);
+    } catch (error) {
+      console.error(`Failed to fetch ${url}:`, error.message);
+    }
   }
 }
