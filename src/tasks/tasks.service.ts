@@ -4,7 +4,6 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { Model } from 'mongoose';
 import { Variant, VariantDocument } from '../schemas/variant.schema';
 import { ConfigService } from '@nestjs/config';
-import axios from 'axios';
 
 @Injectable()
 export class TasksService {
@@ -37,17 +36,5 @@ export class TasksService {
     }
 
     console.log('Check and update of discounted prices completed.');
-  }
-
-  @Cron(CronExpression.EVERY_5_MINUTES)
-  async fetchFrontendURL() {
-    const frontend_url = process.env.APP_FRONTEND_URL;
-    const backend_url = process.env.APP_BACKEND_URL;
-
-    await axios.get(frontend_url);
-    console.log(`Successfully fetched ${frontend_url}`);
-
-    await axios.get(backend_url);
-    console.log(`Successfully fetched ${backend_url}`);
   }
 }

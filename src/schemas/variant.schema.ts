@@ -10,7 +10,7 @@ export class Variant {
   @IsString()
   fragrance: string;
 
-  @Prop({ type: String, default: 0 })
+  @Prop({ type: String, default: '0' })
   @IsString()
   stock: string;
 

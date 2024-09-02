@@ -3,12 +3,42 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Category, CategoryDocument } from '../schemas/category.schema';
 import { GetCategoriesOutput } from './dtos/get-categories.dto';
+import {
+  GetCategoryProductsInput,
+  GetCategoryProductsOutput,
+} from './dtos/get-category-products.dto';
 
 @Injectable()
 export class CategoriesService {
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
+
+  async getCategoryProducts(
+    getCategoryProductsInput: GetCategoryProductsInput,
+  ): Promise<GetCategoryProductsOutput> {
+    const { slug } = getCategoryProductsInput;
+
+    const category = await this.categoryModel
+      .findOne({
+        $or: [{ 'slug.en': slug }, { 'slug.vi': slug }],
+      })
+      .select('name description')
+      .populate({
+        path: 'products',
+        model: 'Product',
+        populate: {
+          path: 'variants',
+          model: 'Variant',
+        },
+      })
+      .lean();
+
+    return {
+      ok: true,
+      category,
+    };
+  }
 
   async getCategories(): Promise<GetCategoriesOutput> {
     try {
