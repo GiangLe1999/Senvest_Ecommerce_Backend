@@ -4,13 +4,13 @@ import {
   NestModule,
   RequestMethod,
 } from '@nestjs/common';
+import * as Joi from 'joi';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AdminsModule } from './admins/admins.module';
 import { AuthModule } from './auth/auth.module';
-import * as Joi from 'joi';
 import { AuthAdminMiddleware } from './auth/admin/auth-admin.middleware';
 import { AdminCategoriesModule } from './admin-categories/admin-categories.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
@@ -101,7 +101,6 @@ import { AdminPaymentsModule } from './admin-payments/admin-payments.module';
     BannersModule,
     ProductsModule,
     PaymentsModule,
-    ScheduleModule.forRoot(),
     TasksModule,
     PusherModule,
     UserWishlistModule,
@@ -109,6 +108,7 @@ import { AdminPaymentsModule } from './admin-payments/admin-payments.module';
     AdminReviewsModule,
     QuestionsModule,
     AdminPaymentsModule,
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

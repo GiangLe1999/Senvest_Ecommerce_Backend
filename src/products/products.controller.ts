@@ -33,6 +33,45 @@ export class ProductsController {
     }
   }
 
+  @Get('new-arrivals')
+  async getNewArrivalsProducts(@Res() res: Response) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getNewArrivalsProducts());
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Get('best-selling')
+  async getBestSellingProducts(@Res() res: Response) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getBestSellingProducts());
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Get('sale-products')
+  async getSaleProducts(@Res() res: Response) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getSaleProducts());
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
   @Get(':slug')
   async getProductBySlug(@Res() res: Response, @Param('slug') slug: string) {
     try {
