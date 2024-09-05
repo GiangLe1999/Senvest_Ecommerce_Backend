@@ -1,15 +1,17 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { GetProductsOutput } from '../admin-products/dtos/get-products.dto';
 import { Product, ProductDocument } from '../schemas/product.schema';
 import { LocalizedString } from '../common/schemas/localized-string.schema';
 import { VariantDocument } from '../schemas/variant.schema';
+import { Category, CategoryDocument } from '../schemas/category.schema';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Category.name) private categoryModel: Model<CategoryDocument>,
   ) {}
 
   async getHomepageProducts(): Promise<GetProductsOutput> {
@@ -183,6 +185,75 @@ export class ProductsService {
         },
         products,
       },
+    };
+  }
+
+  async getAllProducts(): Promise<{
+    ok: boolean;
+    category: {
+      name: LocalizedString;
+      description: LocalizedString;
+      products: Product[];
+    };
+  }> {
+    const products = await this.productModel
+      .find()
+      .populate({
+        path: 'variants',
+        model: 'Variant',
+      })
+      .lean();
+
+    return {
+      ok: true,
+      category: {
+        name: { vi: 'Tất cả sản phẩm', en: 'All products' },
+        description: {
+          vi: 'Khám phá toàn bộ bộ sưu tập nến thơm đa dạng mùi hương, từ thư giãn đến sang trọng, phù hợp với mọi không gian. Sản phẩm chất lượng cao, giá cả hợp lý cho mọi nhu cầu.',
+          en: 'Explore our full collection of scented candles with a variety of fragrances, from relaxing to luxurious, perfect for any space. High-quality products at affordable prices for all your needs.',
+        },
+        products,
+      },
+    };
+  }
+
+  async getRelatedProducts({
+    _id,
+    category_id,
+  }: {
+    _id: string;
+    category_id: string;
+  }): Promise<{
+    ok: boolean;
+    products: Product[];
+  }> {
+    const category = await this.categoryModel.findById(category_id);
+
+    if (!category) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Category does not exist',
+      });
+    }
+
+    const relatedProducts = await this.productModel
+      .find({
+        _id: { $ne: _id },
+        category: new Types.ObjectId(category_id),
+      })
+      .select('name slug description rating')
+      .populate({
+        path: 'variants',
+        model: 'Variant',
+        select:
+          'fragrance price discountedPrice discountedFrom discountedTo images stock',
+      })
+      .limit(8)
+      .lean();
+
+    return {
+      ok: true,
+      products: relatedProducts,
     };
   }
 }

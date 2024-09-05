@@ -35,6 +35,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { AdminReviewsModule } from './admin-reviews/admin-reviews.module';
 import { QuestionsModule } from './questions/questions.module';
 import { AdminPaymentsModule } from './admin-payments/admin-payments.module';
+import { ContactsModule } from './contacts/contacts.module';
+import { UserPaymentsModule } from './user-payments/user-payments.module';
 
 @Module({
   imports: [
@@ -109,6 +111,8 @@ import { AdminPaymentsModule } from './admin-payments/admin-payments.module';
     QuestionsModule,
     AdminPaymentsModule,
     ScheduleModule.forRoot(),
+    ContactsModule,
+    UserPaymentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

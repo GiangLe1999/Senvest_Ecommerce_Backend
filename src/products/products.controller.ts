@@ -1,4 +1,13 @@
-import { Controller, Get, HttpStatus, Param, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Post,
+  Res,
+} from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { Response } from 'express';
 
@@ -66,6 +75,39 @@ export class ProductsController {
         .status(HttpStatus.OK)
         .json(await this.productsService.getSaleProducts());
     } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Get('all-products')
+  async getAllProducts(@Res() res: Response) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getAllProducts());
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Post('related-products')
+  async getRelatedProducts(
+    @Res() res: Response,
+    @Body() body: { _id: string; category_id: string },
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getRelatedProducts(body));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      }
+
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ ok: false, error: error.message });
