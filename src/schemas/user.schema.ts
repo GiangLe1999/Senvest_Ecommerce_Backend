@@ -46,6 +46,9 @@ export class User {
 
   @Prop({ type: Boolean, default: false })
   is_verified: boolean;
+
+  @Prop({ type: Number, default: 0 })
+  orders?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

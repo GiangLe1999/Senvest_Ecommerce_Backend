@@ -381,6 +381,9 @@ export class PaymentsService {
         user_address.province = payment?.user_address?.province;
         user_address.zip = payment?.user_address?.zip;
         user_address.phone = payment?.user_address?.phone;
+
+        user.orders += 1;
+        await user.save();
       }
 
       await this.pusherService.trigger('payment', 'new-payment', {

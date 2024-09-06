@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -16,13 +16,15 @@ export class AdminPaymentsService {
   ) {}
 
   async getOrders() {
-    const orders = await this.paymentsModel.find().populate([
-      {
+    const orders = await this.paymentsModel
+      .find()
+      .populate({
         path: 'user',
         model: 'User',
         select: 'name email',
-      },
-    ]);
+      })
+      .sort({ createdAt: -1 })
+      .lean();
 
     const statusGroupedResult = await this.paymentsModel.aggregate([
       {
@@ -64,5 +66,38 @@ export class AdminPaymentsService {
     }));
 
     return { ok: true, orders, statusSummary: statusArray };
+  }
+
+  async getOrderById(order_id: string) {
+    const order = await this.paymentsModel
+      .findById(order_id)
+      .populate([
+        {
+          path: 'user',
+          model: 'User',
+        },
+        {
+          path: 'user_address',
+          model: 'UserAddress',
+        },
+        {
+          path: 'items._id',
+          model: 'Product',
+        },
+        {
+          path: 'items.variant_id',
+          model: 'Variant',
+        },
+      ])
+      .lean();
+
+    if (!order) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Order does not exist',
+      });
+    }
+
+    return { ok: true, order };
   }
 }
