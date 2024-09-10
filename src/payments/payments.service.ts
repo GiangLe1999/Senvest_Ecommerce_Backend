@@ -249,7 +249,7 @@ export class PaymentsService {
   }
 
   async receiveWebhook(data: any): Promise<ReceiveWebhookOutput> {
-    if (data?.data?.description?.include('DONG GOP')) {
+    if (data?.data?.description?.includes('DONG GOP')) {
       const donation: any = await this.donationsModel.findOne({
         orderCode: data?.data?.orderCode,
         status: StatusEnum.pending,
