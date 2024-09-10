@@ -37,6 +37,8 @@ import { QuestionsModule } from './questions/questions.module';
 import { AdminPaymentsModule } from './admin-payments/admin-payments.module';
 import { ContactsModule } from './contacts/contacts.module';
 import { UserPaymentsModule } from './user-payments/user-payments.module';
+import { AdminUsersModule } from './admin-users/admin-users.module';
+import { DonationsModule } from './donations/donations.module';
 
 @Module({
   imports: [
@@ -113,6 +115,8 @@ import { UserPaymentsModule } from './user-payments/user-payments.module';
     ScheduleModule.forRoot(),
     ContactsModule,
     UserPaymentsModule,
+    AdminUsersModule,
+    DonationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

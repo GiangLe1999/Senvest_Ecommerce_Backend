@@ -87,4 +87,24 @@ export class EmailsService {
       console.log(error);
     }
   }
+
+  async sendSuccessfulDonationEmail(
+    email: string,
+  ): Promise<SendSuccessfulPaymentEmailOutput> {
+    try {
+      const subject = 'Thank you for your donation!';
+
+      await this.mailerService.sendMail({
+        to: email,
+        subject,
+        template: './successful-donation-email',
+      });
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }

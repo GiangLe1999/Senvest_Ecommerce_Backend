@@ -49,6 +49,9 @@ export class User {
 
   @Prop({ type: Number, default: 0 })
   orders?: number;
+
+  @Prop({ type: Number, default: 0 })
+  total_spent?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

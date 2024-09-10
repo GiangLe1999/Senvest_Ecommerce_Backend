@@ -383,6 +383,7 @@ export class PaymentsService {
         user_address.phone = payment?.user_address?.phone;
 
         user.orders += 1;
+        user.total_spent += payment.amount;
         await user.save();
       }
 

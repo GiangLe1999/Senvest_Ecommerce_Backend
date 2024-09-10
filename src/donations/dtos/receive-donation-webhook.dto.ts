@@ -1,7 +1,7 @@
 import { IsString, IsObject } from 'class-validator';
 import { CoreOutput } from '../../common/dtos/output.dto';
 
-export class WebhookResponseDto {
+export class DonationWebhookResponseDto {
   @IsString()
   code: string;
 
@@ -15,4 +15,4 @@ export class WebhookResponseDto {
   data: any;
 }
 
-export class ReceiveWebhookOutput extends CoreOutput {}
+export class ReceiveDonationWebhookOutput extends CoreOutput {}
