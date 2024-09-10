@@ -29,12 +29,14 @@ import { formatCurrencyVND } from './utils/format-currency-vnd';
 import { EmailsService } from '../emails/emails.service';
 import { formatDate } from './utils/format-date';
 import { PusherService } from '../pusher/pusher.service';
+import { Donation, DonationDocument } from 'src/schemas/donation.schema';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     @Inject('PAYOS') private readonly payOS: PayOS,
     @InjectModel(Payment.name) private paymentsModel: Model<PaymentDocument>,
+    @InjectModel(Donation.name) private donationsModel: Model<DonationDocument>,
     @InjectModel(Product.name) private productsModel: Model<ProductDocument>,
     @InjectModel(Variant.name) private variantsModel: Model<VariantDocument>,
     @InjectModel(User.name) private usersModel: Model<UserDocument>,
@@ -247,175 +249,219 @@ export class PaymentsService {
   }
 
   async receiveWebhook(data: any): Promise<ReceiveWebhookOutput> {
-    const payment: any = await this.paymentsModel
-      .findOne({
+    if (data.description.include('DONG GOP')) {
+      const donation: any = await this.donationsModel.findOne({
         orderCode: data?.data?.orderCode,
         status: StatusEnum.pending,
-      })
-      .populate({
-        path: 'user_address',
-        model: UserAddress.name,
       });
 
-    if (!payment) {
-      throw new NotFoundException({
-        ok: false,
-        error: 'Payment does not exist',
-      });
-    }
-
-    if (
-      isValidData(
-        data?.data,
-        data?.signature,
-        this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
-      )
-    ) {
-      payment.status = StatusEnum.paid;
-      payment.transactionDateTime = new Date(data?.data?.transactionDateTime);
-      await payment.save();
-
-      const sendEmailItems = [];
-
-      for (const product of payment.items) {
-        const dbProduct = await this.productsModel
-          .findOne({
-            _id: product._id,
-          })
-          .select('name totalSales totalQuantitySold');
-
-        if (!dbProduct) {
-          payment.status = StatusEnum.cancelled;
-          await payment.save();
-
-          throw new NotFoundException({
-            ok: false,
-            error: 'Product does not exist',
-          });
-        }
-
-        const dbVariant = await this.variantsModel
-          .findById(product.variant_id)
-          .select(
-            'fragrance stock price discountedPrice discountedFrom discountedTo images',
-          );
-
-        if (!dbVariant) {
-          payment.status = StatusEnum.cancelled;
-          await payment.save();
-          throw new NotFoundException({
-            ok: false,
-            error: 'Variant does not exist',
-          });
-        }
-
-        const dbVariantPrice = this.getPriceForVariant(dbVariant);
-
-        dbProduct.totalSales += dbVariantPrice * product.quantity;
-        dbProduct.totalQuantitySold += product.quantity;
-        await dbProduct.save();
-
-        const dbVariantStock = parseInt(dbVariant.stock);
-        if (dbVariantStock < product.quantity) {
-          payment.status = StatusEnum.cancelled;
-          await payment.save();
-          throw new BadRequestException({
-            ok: false,
-            error: 'Variant stock is not enough',
-          });
-        }
-
-        dbVariant.stock = (dbVariantStock - product.quantity).toString();
-        await dbVariant.save();
-
-        sendEmailItems.push({
-          image: dbVariant.images[0],
-          name: dbProduct.name.vi,
-          scent: dbVariant.fragrance,
-          price: formatCurrencyVND(dbVariantPrice),
-          quantity: product.quantity,
-          product_total_price: formatCurrencyVND(
-            dbVariantPrice * product.quantity,
-          ),
+      if (!donation) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Donation does not exist',
         });
       }
 
-      const user_address = {
-        email: '',
-        name: '',
-        address: '',
-        city: '',
-        province: '',
-        zip: '',
-        phone: '',
-      };
+      if (
+        isValidData(
+          data?.data,
+          data?.signature,
+          this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
+        )
+      ) {
+        donation.status = StatusEnum.paid;
+        donation.transactionDateTime = new Date(
+          data?.data?.transactionDateTime,
+        );
+        await donation.save();
 
-      if (payment?.not_user_info) {
-        user_address.email = payment?.not_user_info?.email;
-        user_address.name = payment?.not_user_info?.name;
-        user_address.address = payment?.not_user_info?.address;
-        user_address.city = payment?.not_user_info?.city;
-        user_address.province = payment?.not_user_info?.province;
-        user_address.zip = payment?.not_user_info?.zip;
-        user_address.phone = payment?.not_user_info?.phone;
+        await this.pusherService.trigger('donation', 'new-donation', {
+          total: formatCurrencyVND(donation.amount),
+        });
+
+        await this.emailsService.sendSuccessfulDonationEmail(donation.email);
+
+        return { ok: true };
+      } else {
+        donation.status = StatusEnum.cancelled;
+        await donation.save();
+
+        throw new BadRequestException({
+          ok: false,
+          error: 'The data does not match the signature',
+        });
+      }
+    } else {
+      const payment: any = await this.paymentsModel
+        .findOne({
+          orderCode: data?.data?.orderCode,
+          status: StatusEnum.pending,
+        })
+        .populate({
+          path: 'user_address',
+          model: UserAddress.name,
+        });
+
+      if (!payment) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Payment does not exist',
+        });
       }
 
-      if (payment?.user_address) {
-        const user = await this.usersModel
-          .findOne({
-            _id: payment?.user_address?.user,
-          })
-          .select('email');
-        if (!user) {
-          payment.status = StatusEnum.cancelled;
-          await payment.save();
-          throw new NotFoundException({
-            ok: false,
-            error: 'User does not exist',
+      if (
+        isValidData(
+          data?.data,
+          data?.signature,
+          this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
+        )
+      ) {
+        payment.status = StatusEnum.paid;
+        payment.transactionDateTime = new Date(data?.data?.transactionDateTime);
+        await payment.save();
+
+        const sendEmailItems = [];
+
+        for (const product of payment.items) {
+          const dbProduct = await this.productsModel
+            .findOne({
+              _id: product._id,
+            })
+            .select('name totalSales totalQuantitySold');
+
+          if (!dbProduct) {
+            payment.status = StatusEnum.cancelled;
+            await payment.save();
+
+            throw new NotFoundException({
+              ok: false,
+              error: 'Product does not exist',
+            });
+          }
+
+          const dbVariant = await this.variantsModel
+            .findById(product.variant_id)
+            .select(
+              'fragrance stock price discountedPrice discountedFrom discountedTo images',
+            );
+
+          if (!dbVariant) {
+            payment.status = StatusEnum.cancelled;
+            await payment.save();
+            throw new NotFoundException({
+              ok: false,
+              error: 'Variant does not exist',
+            });
+          }
+
+          const dbVariantPrice = this.getPriceForVariant(dbVariant);
+
+          dbProduct.totalSales += dbVariantPrice * product.quantity;
+          dbProduct.totalQuantitySold += product.quantity;
+          await dbProduct.save();
+
+          const dbVariantStock = parseInt(dbVariant.stock);
+          if (dbVariantStock < product.quantity) {
+            payment.status = StatusEnum.cancelled;
+            await payment.save();
+            throw new BadRequestException({
+              ok: false,
+              error: 'Variant stock is not enough',
+            });
+          }
+
+          dbVariant.stock = (dbVariantStock - product.quantity).toString();
+          await dbVariant.save();
+
+          sendEmailItems.push({
+            image: dbVariant.images[0],
+            name: dbProduct.name.vi,
+            scent: dbVariant.fragrance,
+            price: formatCurrencyVND(dbVariantPrice),
+            quantity: product.quantity,
+            product_total_price: formatCurrencyVND(
+              dbVariantPrice * product.quantity,
+            ),
           });
         }
-        user_address.email = user.email;
-        user_address.name = payment?.user_address?.name;
-        user_address.address = payment?.user_address?.address;
-        user_address.city = payment?.user_address?.city;
-        user_address.province = payment?.user_address?.province;
-        user_address.zip = payment?.user_address?.zip;
-        user_address.phone = payment?.user_address?.phone;
 
-        user.orders += 1;
-        user.total_spent += payment.amount;
-        await user.save();
+        const user_address = {
+          email: '',
+          name: '',
+          address: '',
+          city: '',
+          province: '',
+          zip: '',
+          phone: '',
+        };
+
+        if (payment?.not_user_info) {
+          user_address.email = payment?.not_user_info?.email;
+          user_address.name = payment?.not_user_info?.name;
+          user_address.address = payment?.not_user_info?.address;
+          user_address.city = payment?.not_user_info?.city;
+          user_address.province = payment?.not_user_info?.province;
+          user_address.zip = payment?.not_user_info?.zip;
+          user_address.phone = payment?.not_user_info?.phone;
+        }
+
+        if (payment?.user_address) {
+          const user = await this.usersModel
+            .findOne({
+              _id: payment?.user_address?.user,
+            })
+            .select('email');
+          if (!user) {
+            payment.status = StatusEnum.cancelled;
+            await payment.save();
+            throw new NotFoundException({
+              ok: false,
+              error: 'User does not exist',
+            });
+          }
+          user_address.email = user.email;
+          user_address.name = payment?.user_address?.name;
+          user_address.address = payment?.user_address?.address;
+          user_address.city = payment?.user_address?.city;
+          user_address.province = payment?.user_address?.province;
+          user_address.zip = payment?.user_address?.zip;
+          user_address.phone = payment?.user_address?.phone;
+
+          user.orders += 1;
+          user.total_spent += payment.amount;
+          await user.save();
+        }
+
+        await this.pusherService.trigger('payment', 'new-payment', {
+          name: user_address.name,
+          phone: user_address.phone,
+          address: user_address.address,
+          city: user_address.city,
+          image: sendEmailItems[0].image,
+          total: formatCurrencyVND(payment.amount),
+        });
+
+        await this.emailsService.sendSuccessfulPaymentEmail({
+          items: sendEmailItems,
+          sub_total: formatCurrencyVND(payment.amount),
+          shipping: formatCurrencyVND(0),
+          tax: formatCurrencyVND(0),
+          total: formatCurrencyVND(payment.amount),
+          order_code: payment.orderCode.toString(),
+          created_at: formatDate(payment.transactionDateTime),
+          ...user_address,
+        });
+
+        return { ok: true };
+      } else {
+        payment.status = StatusEnum.cancelled;
+        await payment.save();
+
+        throw new BadRequestException({
+          ok: false,
+          error: 'The data does not match the signature',
+        });
       }
-
-      await this.pusherService.trigger('payment', 'new-payment', {
-        name: user_address.name,
-        phone: user_address.phone,
-        address: user_address.address,
-        city: user_address.city,
-        image: sendEmailItems[0].image,
-        total: formatCurrencyVND(payment.amount),
-      });
-
-      await this.emailsService.sendSuccessfulPaymentEmail({
-        items: sendEmailItems,
-        sub_total: formatCurrencyVND(payment.amount),
-        shipping: formatCurrencyVND(0),
-        tax: formatCurrencyVND(0),
-        total: formatCurrencyVND(payment.amount),
-        order_code: payment.orderCode.toString(),
-        created_at: formatDate(payment.transactionDateTime),
-        ...user_address,
-      });
-
-      return { ok: true };
-    } else {
-      payment.status = StatusEnum.cancelled;
-      await payment.save();
-
-      throw new BadRequestException({
-        ok: false,
-        error: 'The data does not match the signature',
-      });
     }
   }
 }

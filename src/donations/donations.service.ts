@@ -1,9 +1,4 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import PayOS from '@payos/node';
@@ -16,16 +11,11 @@ import {
   StatusEnum,
 } from '../schemas/donation.schema';
 import { CreateDonationLinkInput } from './dtos/create-donation-link.dto';
-import {
-  generateOrderCode,
-  isValidData,
-} from '../payments/utils/check-validate';
+import { generateOrderCode } from '../payments/utils/check-validate';
 import {
   CancelDonationLinkInput,
   CancelDonationLinkOutput,
 } from './dtos/cancel-donation-link.dto';
-import { ReceiveDonationWebhookOutput } from './dtos/receive-donation-webhook.dto';
-import { formatCurrencyVND } from '../payments/utils/format-currency-vnd';
 
 @Injectable()
 export class DonationsService {
@@ -36,6 +26,10 @@ export class DonationsService {
     private pusherService: PusherService,
     private readonly emailsService: EmailsService,
   ) {}
+
+  async getDonationByOrderCode(orderCode: string): Promise<DonationDocument> {
+    return await this.donationsModel.findOne({ orderCode });
+  }
 
   async createDonationLink(createDonationLinkInput: CreateDonationLinkInput) {
     const orderCode = generateOrderCode();
@@ -53,10 +47,10 @@ export class DonationsService {
           price: createDonationLinkInput.amount,
         },
       ],
-      buyerName: 'Anonymous',
-      buyerEmail: 'Anonymous',
-      buyerPhone: 'Anonymous',
-      buyerAddress: 'Anonymous',
+      buyerName: createDonationLinkInput.name,
+      buyerEmail: createDonationLinkInput.email,
+      buyerPhone: createDonationLinkInput?.phone || 'Unknown',
+      buyerAddress: 'Unknown',
     };
 
     const paymentLinkResponse = await this.payOS.createPaymentLink(orderBody);
@@ -123,49 +117,5 @@ export class DonationsService {
     return {
       ok: true,
     };
-  }
-
-  async receiveDonationWebhook(
-    data: any,
-  ): Promise<ReceiveDonationWebhookOutput> {
-    const donation: any = await this.donationsModel.findOne({
-      orderCode: data?.data?.orderCode,
-      status: StatusEnum.pending,
-    });
-
-    if (!donation) {
-      throw new NotFoundException({
-        ok: false,
-        error: 'Donation does not exist',
-      });
-    }
-
-    if (
-      isValidData(
-        data?.data,
-        data?.signature,
-        this.configService.get<string>('PAYOS_CHECKSUM_KEY'),
-      )
-    ) {
-      donation.status = StatusEnum.paid;
-      donation.transactionDateTime = new Date(data?.data?.transactionDateTime);
-      await donation.save();
-
-      await this.pusherService.trigger('donation', 'new-donation', {
-        total: formatCurrencyVND(donation.amount),
-      });
-
-      await this.emailsService.sendSuccessfulDonationEmail(donation.email);
-
-      return { ok: true };
-    } else {
-      donation.status = StatusEnum.cancelled;
-      await donation.save();
-
-      throw new BadRequestException({
-        ok: false,
-        error: 'The data does not match the signature',
-      });
-    }
   }
 }

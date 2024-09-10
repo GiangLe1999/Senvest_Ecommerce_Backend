@@ -10,6 +10,7 @@ import { UserAddress, UserAddressSchema } from '../schemas/user-address.schema';
 import { Variant, VariantSchema } from '../schemas/variant.schema';
 import { User, UserSchema } from '../schemas/user.schema';
 import { PusherModule } from '../pusher/pusher.module';
+import { Donation, DonationSchema } from 'src/schemas/donation.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,10 @@ import { PusherModule } from '../pusher/pusher.module';
       {
         name: Payment.name,
         schema: PaymentSchema,
+      },
+      {
+        name: Donation.name,
+        schema: DonationSchema,
       },
       {
         name: Product.name,
