@@ -188,6 +188,45 @@ export class ProductsService {
     };
   }
 
+  async getSearchProducts(keyword: string): Promise<{
+    ok: boolean;
+    category: {
+      name: LocalizedString;
+      description: LocalizedString;
+      products: Product[];
+    };
+  }> {
+    const products = await this.productModel
+      .find({
+        // Use a regex to search in the 'name' or 'description' field for the keyword
+        $or: [
+          { 'name.vi': { $regex: keyword, $options: 'i' } },
+          { 'name.en': { $regex: keyword, $options: 'i' } },
+          { 'description.vi': { $regex: keyword, $options: 'i' } },
+          { 'description.en': { $regex: keyword, $options: 'i' } },
+        ],
+        status: 'Published',
+      })
+      .populate({
+        path: 'variants',
+        model: 'Variant',
+      })
+      .sort({ totalQuantitySold: -1 })
+      .lean();
+
+    return {
+      ok: true,
+      category: {
+        name: { vi: 'Sản phẩm tìm kiếm', en: 'Search Results' },
+        description: {
+          vi: `Kết quả tìm kiếm sản phẩm cho từ khóa “${keyword}”. Tìm kiếm những mùi hương độc đáo, chất lượng cao, và phù hợp với mọi không gian.`,
+          en: `Search results for products matching the keyword “${keyword}”. Discover unique fragrances, high quality, and perfect for any space.`,
+        },
+        products,
+      },
+    };
+  }
+
   async getAllProducts(): Promise<{
     ok: boolean;
     category: {

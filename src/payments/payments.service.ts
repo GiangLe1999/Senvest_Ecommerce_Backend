@@ -29,7 +29,7 @@ import { formatCurrencyVND } from './utils/format-currency-vnd';
 import { EmailsService } from '../emails/emails.service';
 import { formatDate } from './utils/format-date';
 import { PusherService } from '../pusher/pusher.service';
-import { Donation, DonationDocument } from 'src/schemas/donation.schema';
+import { Donation, DonationDocument } from '../schemas/donation.schema';
 
 @Injectable()
 export class PaymentsService {
@@ -249,7 +249,7 @@ export class PaymentsService {
   }
 
   async receiveWebhook(data: any): Promise<ReceiveWebhookOutput> {
-    if (data?.data?.description?.includes('DONG GOP')) {
+    if (data?.data?.description?.includes('Dong gop')) {
       const donation: any = await this.donationsModel.findOne({
         orderCode: data?.data?.orderCode,
         status: StatusEnum.pending,

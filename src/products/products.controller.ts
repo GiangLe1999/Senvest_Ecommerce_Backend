@@ -126,4 +126,20 @@ export class ProductsController {
         .json({ ok: false, error: error.message });
     }
   }
+
+  @Get('search/:keyword')
+  async getSearchProducts(
+    @Res() res: Response,
+    @Param('keyword') keyword: string,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getSearchProducts(keyword));
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
 }
