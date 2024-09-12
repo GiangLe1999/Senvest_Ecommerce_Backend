@@ -23,7 +23,7 @@ export class CategoriesService {
       .findOne({
         $or: [{ 'slug.en': slug }, { 'slug.vi': slug }],
       })
-      .select('name description')
+      .select('name description slug')
       .populate({
         path: 'products',
         model: 'Product',
