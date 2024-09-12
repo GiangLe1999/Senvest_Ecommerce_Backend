@@ -144,6 +144,8 @@ export class UsersService {
 
       await newUser.save();
 
+      await this.userWishlistService.createUserWishlist(newUser._id);
+
       const { accessToken, expiresIn, refreshToken } =
         await this.authService.provideToken(newUser._id.toString());
 

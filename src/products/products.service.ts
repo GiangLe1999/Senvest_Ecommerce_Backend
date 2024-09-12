@@ -217,7 +217,10 @@ export class ProductsService {
     return {
       ok: true,
       category: {
-        name: { vi: 'Sản phẩm tìm kiếm', en: 'Search Results' },
+        name: {
+          vi: keyword,
+          en: keyword,
+        },
         description: {
           vi: `Kết quả tìm kiếm sản phẩm cho từ khóa “${keyword}”. Tìm kiếm những mùi hương độc đáo, chất lượng cao, và phù hợp với mọi không gian.`,
           en: `Search results for products matching the keyword “${keyword}”. Discover unique fragrances, high quality, and perfect for any space.`,
