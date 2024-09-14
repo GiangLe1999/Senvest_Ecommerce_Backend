@@ -24,7 +24,7 @@ export class AdminBannersService {
   ) {}
 
   async findBannerById(_id: string): Promise<BannerDocument> {
-    return this.bannersModel.findById(_id);
+    return this.bannersModel.findById(_id).lean();
   }
 
   async getBanners(): Promise<GetBannersOutput> {
@@ -68,6 +68,22 @@ export class AdminBannersService {
         status: createBannerInput.status,
         link: createBannerInput.link,
         image: uploadResult.secure_url,
+        line_1: {
+          vi: createBannerInput.line_1_vi,
+          en: createBannerInput.line_1_en,
+        },
+        line_2: {
+          vi: createBannerInput.line_2_vi,
+          en: createBannerInput.line_2_en,
+        },
+        line_3: {
+          vi: createBannerInput.line_3_vi,
+          en: createBannerInput.line_3_en,
+        },
+        button_text: {
+          vi: createBannerInput.button_text_vi,
+          en: createBannerInput.button_text_en,
+        },
       });
       return {
         ok: true,
@@ -146,6 +162,53 @@ export class AdminBannersService {
         updateObj = {
           ...updateObj,
           link: updateBannerInput?.link,
+        };
+      }
+
+      if (updateBannerInput?.line_1_vi || updateBannerInput?.line_1_en) {
+        updateObj = {
+          ...updateObj,
+          line_1: {
+            ...oldBanner.line_1,
+            en: updateBannerInput?.line_1_en || oldBanner.line_1.en,
+            vi: updateBannerInput?.line_1_vi || oldBanner.line_1.vi,
+          },
+        };
+      }
+
+      if (updateBannerInput?.line_2_vi || updateBannerInput?.line_2_en) {
+        updateObj = {
+          ...updateObj,
+          line_2: {
+            ...oldBanner.line_2,
+            en: updateBannerInput?.line_2_en || oldBanner.line_2.en,
+            vi: updateBannerInput?.line_2_vi || oldBanner.line_2.vi,
+          },
+        };
+      }
+
+      if (updateBannerInput?.line_3_vi || updateBannerInput?.line_3_en) {
+        updateObj = {
+          ...updateObj,
+          line_3: {
+            ...oldBanner.line_3,
+            en: updateBannerInput?.line_3_en || oldBanner.line_3.en,
+            vi: updateBannerInput?.line_3_vi || oldBanner.line_3.vi,
+          },
+        };
+      }
+
+      if (
+        updateBannerInput?.button_text_vi ||
+        updateBannerInput?.button_text_en
+      ) {
+        updateObj = {
+          ...updateObj,
+          button_text: {
+            ...oldBanner.button_text,
+            en: updateBannerInput?.button_text_en || oldBanner.button_text.en,
+            vi: updateBannerInput?.button_text_vi || oldBanner.button_text.vi,
+          },
         };
       }
 

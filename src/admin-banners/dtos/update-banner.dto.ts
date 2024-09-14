@@ -7,16 +7,52 @@ export class UpdateBannerInput {
   _id: string;
 
   @IsOptional()
+  @IsString()
   name?: string;
 
   @IsOptional()
+  @IsString()
   link?: string;
 
   @IsOptional()
+  @IsString()
   order?: string;
 
   @IsOptional()
+  @IsString()
   status?: 'Active' | 'Inactive';
+
+  @IsOptional()
+  @IsString()
+  line_1_vi?: string;
+
+  @IsOptional()
+  @IsString()
+  line_1_en?: string;
+
+  @IsOptional()
+  @IsString()
+  line_2_vi?: string;
+
+  @IsOptional()
+  @IsString()
+  line_2_en?: string;
+
+  @IsOptional()
+  @IsString()
+  line_3_vi?: string;
+
+  @IsOptional()
+  @IsString()
+  line_3_en?: string;
+
+  @IsOptional()
+  @IsString()
+  button_text_vi?: string;
+
+  @IsOptional()
+  @IsString()
+  button_text_en?: string;
 }
 
 export class UpdateBannerOutput extends CoreOutput {
