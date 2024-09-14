@@ -39,6 +39,7 @@ import { ContactsModule } from './contacts/contacts.module';
 import { UserPaymentsModule } from './user-payments/user-payments.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { DonationsModule } from './donations/donations.module';
+import { SubscribersModule } from './subscribers/subscribers.module';
 
 @Module({
   imports: [
@@ -117,6 +118,7 @@ import { DonationsModule } from './donations/donations.module';
     UserPaymentsModule,
     AdminUsersModule,
     DonationsModule,
+    SubscribersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
