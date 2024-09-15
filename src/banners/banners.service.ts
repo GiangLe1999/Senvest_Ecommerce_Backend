@@ -13,7 +13,7 @@ export class BannersService {
   async getBanners(): Promise<GetBannersOutput> {
     const banners = await this.bannersModel
       .find({ status: 'Active' })
-      .select('image link')
+      .select('image link line_1 line_2 line_3 button_text')
       .sort({ order: 1 })
       .lean();
     return {
