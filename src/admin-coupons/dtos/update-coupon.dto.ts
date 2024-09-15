@@ -27,6 +27,10 @@ export class UpdateCouponInput {
   @IsString()
   @IsOptional()
   discount_type?: string;
+
+  @IsOptional()
+  @IsNumber()
+  max_usage_count?: number;
 }
 
 export class UpdateCouponOutput extends CoreOutput {

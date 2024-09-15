@@ -20,6 +20,9 @@ export class CreateCouponInput {
 
   @IsString()
   discount_type: string;
+
+  @IsNumber()
+  max_usage_count: number;
 }
 
 export class CreateCouponOutput extends CoreOutput {

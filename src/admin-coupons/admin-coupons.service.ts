@@ -145,6 +145,13 @@ export class AdminCouponsService {
         }
       }
 
+      if (updateCouponInput?.max_usage_count) {
+        updateObj = {
+          ...updateObj,
+          max_usage_count: updateCouponInput?.max_usage_count,
+        };
+      }
+
       if (updateCouponInput?.assigned_to_email) {
         updateObj = {
           ...updateObj,

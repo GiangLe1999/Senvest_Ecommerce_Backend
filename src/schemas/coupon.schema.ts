@@ -40,6 +40,9 @@ export class Coupon {
   @Prop({ type: Number, default: 0 })
   usage_count: number;
 
+  @Prop({ type: Number, default: 100 })
+  max_usage_count: number;
+
   @Prop({ type: String })
   assigned_to_email?: string;
 }
