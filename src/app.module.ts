@@ -40,6 +40,8 @@ import { UserPaymentsModule } from './user-payments/user-payments.module';
 import { AdminUsersModule } from './admin-users/admin-users.module';
 import { DonationsModule } from './donations/donations.module';
 import { SubscribersModule } from './subscribers/subscribers.module';
+import { CouponsModule } from './coupons/coupons.module';
+import { AdminCouponsModule } from './admin-coupons/admin-coupons.module';
 
 @Module({
   imports: [
@@ -119,6 +121,8 @@ import { SubscribersModule } from './subscribers/subscribers.module';
     AdminUsersModule,
     DonationsModule,
     SubscribersModule,
+    CouponsModule,
+    AdminCouponsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

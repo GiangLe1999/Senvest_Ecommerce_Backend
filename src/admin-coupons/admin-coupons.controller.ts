@@ -9,28 +9,25 @@ import {
   Post,
   Put,
   Res,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { AdminBannersService } from './admin-banners.service';
+import { AdminCouponsService } from './admin-coupons.service';
 import { AuthAdminGuard } from '../auth/admin/auth-admin.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { CreateBannerInput } from '../admin-banners/dtos/create-banner.dto';
+import { CreateCouponInput } from './dtos/create-coupon.dto';
 import { Response } from 'express';
-import { UpdateBannerInput } from './dtos/update-banner.dto';
+import { UpdateCouponInput } from './dtos/update-coupon.dto';
 
-@Controller('admins/admin-banners')
-export class AdminBannersController {
-  constructor(private readonly adminBannersService: AdminBannersService) {}
+@Controller('admins/admin-coupons')
+export class AdminCouponsController {
+  constructor(private readonly adminCouponsService: AdminCouponsService) {}
 
   @Get()
   @UseGuards(AuthAdminGuard)
-  async getBanners(@Res() res: Response) {
+  async getCoupons(@Res() res: Response) {
     try {
       res
         .status(HttpStatus.OK)
-        .json(await this.adminBannersService.getBanners());
+        .json(await this.adminCouponsService.getCoupons());
     } catch (error) {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -40,19 +37,14 @@ export class AdminBannersController {
 
   @Post('create')
   @UseGuards(AuthAdminGuard)
-  @UseInterceptors(FileInterceptor('file'))
   async createBanner(
-    @UploadedFile() file: Express.Multer.File,
     @Res() res: Response,
-    @Body() createBannerInput: CreateBannerInput,
+    @Body() createCouponInput: CreateCouponInput,
   ) {
     try {
-      res.status(HttpStatus.CREATED).json(
-        await this.adminBannersService.createBanner({
-          ...createBannerInput,
-          image: file,
-        }),
-      );
+      res
+        .status(HttpStatus.CREATED)
+        .json(await this.adminCouponsService.createCoupon(createCouponInput));
     } catch (error) {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -62,19 +54,14 @@ export class AdminBannersController {
 
   @Put('update')
   @UseGuards(AuthAdminGuard)
-  @UseInterceptors(FileInterceptor('file'))
-  async updateBanner(
-    @UploadedFile() file: Express.Multer.File,
+  async updateCoupon(
     @Res() res: Response,
-    @Body() updateBannerInput: UpdateBannerInput,
+    @Body() updateCouponInput: UpdateCouponInput,
   ) {
     try {
-      res.status(HttpStatus.OK).json(
-        await this.adminBannersService.updateBanner({
-          ...updateBannerInput,
-          image: file,
-        }),
-      );
+      res
+        .status(HttpStatus.OK)
+        .json(await this.adminCouponsService.updateCoupon(updateCouponInput));
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
@@ -88,11 +75,11 @@ export class AdminBannersController {
 
   @Delete('delete/:id')
   @UseGuards(AuthAdminGuard)
-  async deleteBanner(@Res() res: Response, @Param('id') id: string) {
+  async deleteCoupon(@Res() res: Response, @Param('id') id: string) {
     try {
       res
         .status(HttpStatus.OK)
-        .json(await this.adminBannersService.deleteBanner(id));
+        .json(await this.adminCouponsService.deleteCoupon(id));
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());

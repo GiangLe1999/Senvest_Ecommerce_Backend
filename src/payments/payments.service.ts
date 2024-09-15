@@ -48,12 +48,13 @@ export class PaymentsService {
   ) {}
 
   private getPriceForVariant(variant: VariantDocument): number {
-    const now = new Date();
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
 
     if (
       variant?.discountedPrice &&
-      now >= variant.discountedFrom &&
-      now <= variant.discountedTo
+      endOfToday >= variant.discountedFrom &&
+      endOfToday <= variant.discountedTo
     ) {
       return parseFloat(variant?.discountedPrice);
     } else {
