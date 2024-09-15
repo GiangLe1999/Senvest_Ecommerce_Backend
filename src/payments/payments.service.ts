@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import PayOS from '@payos/node';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import {
   Payment,
   PaymentDocument,
@@ -454,7 +454,7 @@ export class PaymentsService {
         if (payment?.user_address) {
           const user = await this.usersModel
             .findOne({
-              _id: new Types.ObjectId(payment?.user_address?.user),
+              _id: payment?.user_address?.user,
             })
             .select('email');
           if (!user) {
