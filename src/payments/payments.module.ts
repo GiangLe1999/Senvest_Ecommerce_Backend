@@ -11,11 +11,13 @@ import { Variant, VariantSchema } from '../schemas/variant.schema';
 import { User, UserSchema } from '../schemas/user.schema';
 import { PusherModule } from '../pusher/pusher.module';
 import { Donation, DonationSchema } from '../schemas/donation.schema';
+import { CouponsModule } from '../coupons/coupons.module';
 
 @Module({
   imports: [
     ConfigModule,
     PusherModule,
+    CouponsModule,
     MongooseModule.forFeature([
       {
         name: Payment.name,

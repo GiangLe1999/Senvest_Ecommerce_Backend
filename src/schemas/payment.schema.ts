@@ -79,6 +79,9 @@ export class Payment {
 
   @Prop({ type: Date })
   transactionDateTime?: Date;
+
+  @Prop({ type: String })
+  coupon_code?: string;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

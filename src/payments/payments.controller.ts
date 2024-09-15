@@ -119,7 +119,6 @@ export class PaymentsController {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
       } else {
-        console.log(error);
         res
           .status(HttpStatus.INTERNAL_SERVER_ERROR)
           .json({ ok: false, error: error.message });

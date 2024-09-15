@@ -7,7 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import PayOS from '@payos/node';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import {
   Payment,
   PaymentDocument,
@@ -30,6 +30,7 @@ import { EmailsService } from '../emails/emails.service';
 import { formatDate } from './utils/format-date';
 import { PusherService } from '../pusher/pusher.service';
 import { Donation, DonationDocument } from '../schemas/donation.schema';
+import { CouponsService } from '../coupons/coupons.service';
 
 @Injectable()
 export class PaymentsService {
@@ -45,6 +46,7 @@ export class PaymentsService {
     private configService: ConfigService,
     private pusherService: PusherService,
     private readonly emailsService: EmailsService,
+    private readonly couponsService: CouponsService,
   ) {}
 
   private getPriceForVariant(variant: VariantDocument): number {
@@ -154,10 +156,37 @@ export class PaymentsService {
       user_info.buyerAddress = createPaymentLinkInput.not_user_info.address;
     }
 
-    const doubleCheckAmount = newItems.reduce(
+    let doubleCheckAmount = newItems.reduce(
       (acc, item) => acc + item.price * item.quantity,
       0,
     );
+
+    if (createPaymentLinkInput?.coupon_code) {
+      const coupon = await this.couponsService.getCouponByCode(
+        createPaymentLinkInput?.coupon_code,
+      );
+
+      if (!coupon) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Coupon does not exist',
+        });
+      }
+
+      if (coupon?.max_usage_count <= 0) {
+        throw new BadRequestException({
+          ok: false,
+          error: 'Coupon has expired',
+        });
+      }
+
+      const calculated_discount_value =
+        coupon.discount_type === 'Percent'
+          ? (doubleCheckAmount * coupon.discount_value) / 100
+          : coupon.discount_value;
+
+      doubleCheckAmount = doubleCheckAmount - calculated_discount_value;
+    }
 
     if (createPaymentLinkInput?.amount !== doubleCheckAmount) {
       throw new BadRequestException({
@@ -191,6 +220,9 @@ export class PaymentsService {
         }),
         ...(createPaymentLinkInput?.not_user_info && {
           not_user_info: { ...createPaymentLinkInput?.not_user_info },
+        }),
+        ...(createPaymentLinkInput?.coupon_code && {
+          coupon_code: createPaymentLinkInput?.coupon_code,
         }),
       });
     }
@@ -321,6 +353,19 @@ export class PaymentsService {
         payment.transactionDateTime = new Date(data?.data?.transactionDateTime);
         await payment.save();
 
+        if (payment?.coupon_code) {
+          const coupon = await this.couponsService.getCouponByCode(
+            payment?.coupon_code,
+          );
+          if (coupon) {
+            coupon.usage_count += 1;
+            coupon.max_usage_count -= 1;
+            await coupon.save();
+          }
+        }
+
+        console.log(payment);
+
         const sendEmailItems = [];
 
         for (const product of payment.items) {
@@ -409,7 +454,7 @@ export class PaymentsService {
         if (payment?.user_address) {
           const user = await this.usersModel
             .findOne({
-              _id: payment?.user_address?.user,
+              _id: new Types.ObjectId(payment?.user_address?.user),
             })
             .select('email');
           if (!user) {
@@ -432,6 +477,8 @@ export class PaymentsService {
           user.total_spent += payment.amount;
           await user.save();
         }
+
+        console.log(sendEmailItems);
 
         await this.pusherService.trigger('payment', 'new-payment', {
           name: user_address.name,

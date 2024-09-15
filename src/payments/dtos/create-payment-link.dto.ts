@@ -28,6 +28,10 @@ export class CreatePaymentLinkInput {
   @IsOptional()
   user_address?: string;
 
+  @IsString()
+  @IsOptional()
+  coupon_code?: string;
+
   @IsObject()
   @IsOptional()
   not_user_info?: {

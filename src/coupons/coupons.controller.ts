@@ -1,4 +1,29 @@
-import { Controller } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  NotFoundException,
+  Param,
+  Res,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { CouponsService } from './coupons.service';
 
 @Controller('coupons')
-export class CouponsController {}
+export class CouponsController {
+  constructor(private readonly couponsService: CouponsService) {}
+
+  @Get(':code')
+  async get(@Res() res: Response, @Param('code') code: string) {
+    try {
+      res.status(HttpStatus.OK).json(await this.couponsService.getCoupon(code));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      }
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+}
