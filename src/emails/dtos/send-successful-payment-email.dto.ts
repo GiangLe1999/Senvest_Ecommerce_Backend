@@ -11,6 +11,7 @@ export interface SendSuccessfulPaymentEmailInput {
   }[];
   sub_total: string;
   shipping: string;
+  discount: string;
   tax: string;
   total: string;
   email: string;

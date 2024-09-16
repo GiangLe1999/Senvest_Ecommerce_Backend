@@ -34,11 +34,12 @@ export class UserPaymentsService {
         {
           path: 'items._id',
           model: 'Product',
-          select: 'name images',
+          select: 'name description',
         },
         {
           path: 'items.variant_id',
           model: 'Variant',
+          select: 'fragrance images price',
         },
       ])
       .lean();

@@ -85,6 +85,9 @@ export class Payment {
 
   @Prop({ type: String })
   coupon_code?: string;
+
+  @Prop({ type: Number })
+  coupon_value?: number;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

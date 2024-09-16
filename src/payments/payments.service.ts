@@ -171,6 +171,8 @@ export class PaymentsService {
       0,
     );
 
+    let calculated_discount_value = 0;
+
     if (createPaymentLinkInput?.coupon_code) {
       const coupon = await this.couponsService.getCouponByCode(
         createPaymentLinkInput?.coupon_code,
@@ -190,7 +192,7 @@ export class PaymentsService {
         });
       }
 
-      const calculated_discount_value =
+      calculated_discount_value =
         coupon.discount_type === 'Percent'
           ? (doubleCheckAmount * coupon.discount_value) / 100
           : coupon.discount_value;
@@ -233,6 +235,7 @@ export class PaymentsService {
         }),
         ...(createPaymentLinkInput?.coupon_code && {
           coupon_code: createPaymentLinkInput?.coupon_code,
+          coupon_value: calculated_discount_value,
         }),
       });
     }
@@ -500,6 +503,7 @@ export class PaymentsService {
           sub_total: formatCurrencyVND(payment.amount),
           shipping: formatCurrencyVND(0),
           tax: formatCurrencyVND(0),
+          discount: formatCurrencyVND(payment?.coupon_value || 0),
           total: formatCurrencyVND(payment.amount),
           order_code: payment.orderCode.toString(),
           created_at: formatDate(payment.transactionDateTime),
