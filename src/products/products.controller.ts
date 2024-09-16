@@ -6,6 +6,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Query,
   Res,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -121,6 +122,27 @@ export class ProductsController {
         .status(HttpStatus.OK)
         .json(await this.productsService.getProductBySlug(slug));
     } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .json({ ok: false, error: error.message });
+    }
+  }
+
+  @Get('get-by-id/:_id')
+  async getProductById(
+    @Res() res: Response,
+    @Param('_id') _id: string,
+    @Query('variant_id') variant_id: string,
+  ) {
+    try {
+      res
+        .status(HttpStatus.OK)
+        .json(await this.productsService.getProductById({ _id, variant_id }));
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      }
+
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ ok: false, error: error.message });

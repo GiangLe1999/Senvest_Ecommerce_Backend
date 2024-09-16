@@ -74,6 +74,57 @@ export class ProductsService {
     };
   }
 
+  async getProductById({
+    _id,
+    variant_id,
+  }: {
+    _id: string;
+    variant_id: string;
+  }): Promise<{ ok: boolean; product: Product }> {
+    const product = await this.productModel
+      .findById(new Types.ObjectId(_id))
+      .populate([
+        {
+          path: 'variants',
+          model: 'Variant',
+        },
+        {
+          path: 'category',
+          model: 'Category',
+          select: 'name slug',
+        },
+      ])
+      .lean();
+
+    if (!product) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Product does not exist',
+      });
+    }
+
+    // Filter the variants array to include only the variant with _id = variant_id
+    if (product?.variants) {
+      const variant = product.variants.find(
+        (variant: any) => String(variant._id) === variant_id,
+      );
+
+      if (!variant) {
+        throw new NotFoundException({
+          ok: false,
+          error: 'Variant does not exist',
+        });
+      }
+
+      product.variants = [variant];
+    }
+
+    return {
+      ok: true,
+      product,
+    };
+  }
+
   async getNewArrivalsProducts(): Promise<{
     ok: boolean;
     category: {

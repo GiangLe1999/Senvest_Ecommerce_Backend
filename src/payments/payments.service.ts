@@ -364,8 +364,6 @@ export class PaymentsService {
           }
         }
 
-        console.log(payment);
-
         const sendEmailItems = [];
 
         for (const product of payment.items) {
