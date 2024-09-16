@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Payment, PaymentDocument } from '../schemas/payment.schema';
@@ -14,8 +14,42 @@ export class UserPaymentsService {
   ): Promise<{ ok: true; payments: PaymentDocument[] }> {
     const payments = await this.paymentsModel
       .find({ user: user_id })
-      .sort({ createdAt: -1 });
+      .sort({ updatedAt: -1 });
 
     return { ok: true, payments };
+  }
+
+  async getPaymentByOrderCode(orderCode: string) {
+    const order = await this.paymentsModel
+      .findOne({ orderCode: Number(orderCode) })
+      .populate([
+        {
+          path: 'user',
+          model: 'User',
+        },
+        {
+          path: 'user_address',
+          model: 'UserAddress',
+        },
+        {
+          path: 'items._id',
+          model: 'Product',
+          select: 'name images',
+        },
+        {
+          path: 'items.variant_id',
+          model: 'Variant',
+        },
+      ])
+      .lean();
+
+    if (!order) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Order does not exist',
+      });
+    }
+
+    return { ok: true, order };
   }
 }

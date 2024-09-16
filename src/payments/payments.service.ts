@@ -74,6 +74,7 @@ export class PaymentsService {
     },
   ) {
     const { items } = createPaymentLinkInput;
+    const savedItems = [];
     const newItems = await Promise.all(
       items?.map(async (item) => {
         const product = await this.productsModel
@@ -113,6 +114,13 @@ export class PaymentsService {
             error: 'Insufficient stock',
           });
         }
+
+        savedItems.push({
+          _id: item._id,
+          variant_id: item.variant_id,
+          price: this.getPriceForVariant(variant),
+          quantity: item.quantity,
+        });
 
         return {
           name:
@@ -214,7 +222,7 @@ export class PaymentsService {
         user: createPaymentLinkInput?.user || null,
         status: StatusEnum.pending,
         amount: doubleCheckAmount,
-        items: createPaymentLinkInput?.items,
+        items: savedItems,
         ...(createPaymentLinkInput?.user_address && {
           user_address: createPaymentLinkInput?.user_address,
         }),

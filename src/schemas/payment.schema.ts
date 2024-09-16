@@ -23,6 +23,9 @@ export class Item {
   variant_id: mongoose.Schema.Types.ObjectId;
 
   @Prop({ required: true })
+  price: number;
+
+  @Prop({ required: true })
   quantity: number;
 }
 
