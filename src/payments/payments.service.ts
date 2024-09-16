@@ -115,10 +115,12 @@ export class PaymentsService {
           });
         }
 
+        const finalPrice = this.getPriceForVariant(variant);
+
         savedItems.push({
           _id: item._id,
           variant_id: item.variant_id,
-          price: this.getPriceForVariant(variant),
+          price: finalPrice,
           quantity: item.quantity,
         });
 
@@ -128,7 +130,7 @@ export class PaymentsService {
             ' - ' +
             variant?.fragrance,
           quantity: item.quantity,
-          price: this.getPriceForVariant(variant),
+          price: finalPrice,
         };
       }),
     );
@@ -462,7 +464,7 @@ export class PaymentsService {
             .findOne({
               _id: payment?.user_address?.user,
             })
-            .select('email');
+            .select('email orders total_spent');
           if (!user) {
             payment.status = StatusEnum.cancelled;
             await payment.save();
@@ -483,8 +485,6 @@ export class PaymentsService {
           user.total_spent += payment.amount;
           await user.save();
         }
-
-        console.log(sendEmailItems);
 
         await this.pusherService.trigger('payment', 'new-payment', {
           name: user_address.name,
