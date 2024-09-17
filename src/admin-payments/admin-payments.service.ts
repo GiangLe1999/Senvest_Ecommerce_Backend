@@ -83,10 +83,12 @@ export class AdminPaymentsService {
         {
           path: 'items._id',
           model: 'Product',
+          select: 'name description',
         },
         {
           path: 'items.variant_id',
           model: 'Variant',
+          select: 'fragrance images price',
         },
       ])
       .lean();
