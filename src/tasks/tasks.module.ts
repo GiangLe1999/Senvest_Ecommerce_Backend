@@ -1,11 +1,15 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { TasksService } from './tasks.service';
-import { Variant, VariantSchema } from '../schemas/variant.schema';
+import { Coupon, CouponSchema } from '../schemas/coupon.schema';
+import { User, UserSchema } from '../schemas/user.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Variant.name, schema: VariantSchema }]),
+    MongooseModule.forFeature([
+      { name: Coupon.name, schema: CouponSchema },
+      { name: User.name, schema: UserSchema },
+    ]),
   ],
   providers: [TasksService],
   exports: [TasksService],

@@ -152,13 +152,6 @@ export class AdminCouponsService {
         };
       }
 
-      if (updateCouponInput?.assigned_to_email) {
-        updateObj = {
-          ...updateObj,
-          assigned_to_email: updateCouponInput?.assigned_to_email,
-        };
-      }
-
       const newCoupon = await this.couponsModel.findByIdAndUpdate(
         updateCouponInput._id,
         updateObj,

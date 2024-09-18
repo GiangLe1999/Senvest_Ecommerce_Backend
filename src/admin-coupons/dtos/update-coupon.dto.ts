@@ -22,10 +22,6 @@ export class UpdateCouponInput {
 
   @IsString()
   @IsOptional()
-  assigned_to_email?: string;
-
-  @IsString()
-  @IsOptional()
   discount_type?: string;
 
   @IsOptional()
