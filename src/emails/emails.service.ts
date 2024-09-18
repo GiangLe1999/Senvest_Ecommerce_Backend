@@ -12,6 +12,10 @@ import {
   SendSuccessfulPaymentEmailInput,
   SendSuccessfulPaymentEmailOutput,
 } from './dtos/send-successful-payment-email.dto';
+import {
+  SendBirthdayCouponEmailInput,
+  SendBirthdayCouponEmailOutput,
+} from './dtos/send-birthday-coupon-email.dto';
 
 @Injectable()
 export class EmailsService {
@@ -98,6 +102,27 @@ export class EmailsService {
         to: email,
         subject,
         template: './successful-donation-email',
+      });
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async sendBirthdayCouponEmail(
+    sendBirthdayCouponInput: SendBirthdayCouponEmailInput,
+  ): Promise<SendBirthdayCouponEmailOutput> {
+    try {
+      const subject = 'Happy birthday to you!';
+
+      await this.mailerService.sendMail({
+        to: sendBirthdayCouponInput.email,
+        subject,
+        template: './birthday-coupon-email',
+        context: sendBirthdayCouponInput,
       });
 
       return {

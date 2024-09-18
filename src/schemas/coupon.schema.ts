@@ -44,7 +44,7 @@ export class Coupon {
   max_usage_count: number;
 
   @Prop({ type: String })
-  assigned_to_user?: string;
+  assigned_to_email?: string;
 }
 
 export const CouponSchema = SchemaFactory.createForClass(Coupon);

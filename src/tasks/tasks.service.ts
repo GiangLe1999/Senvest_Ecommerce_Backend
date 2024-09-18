@@ -9,12 +9,14 @@ import {
 } from '../schemas/coupon.schema';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
+import { EmailsService } from 'src/emails/emails.service';
 
 @Injectable()
 export class TasksService {
   constructor(
     @InjectModel(Coupon.name) private couponsModel: Model<CouponDocument>,
     @InjectModel(User.name) private usersModel: Model<UserDocument>,
+    private readonly emailsService: EmailsService,
     private config: ConfigService,
   ) {}
 
@@ -58,8 +60,14 @@ export class TasksService {
         code: couponCode,
         discount_value: 10,
         max_usage_count: 1,
-        assigned_to_user: user._id.toString(),
+        assigned_to_email: user.email,
         expiry_date: expiryDate,
+      });
+
+      await this.emailsService.sendBirthdayCouponEmail({
+        email: user.email,
+        coupon: couponCode,
+        date: formattedDate,
       });
     }
 

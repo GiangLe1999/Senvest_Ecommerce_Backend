@@ -4,6 +4,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  Query,
   Res,
 } from '@nestjs/common';
 import { Response } from 'express';
@@ -14,9 +15,15 @@ export class CouponsController {
   constructor(private readonly couponsService: CouponsService) {}
 
   @Get(':code')
-  async get(@Res() res: Response, @Param('code') code: string) {
+  async get(
+    @Res() res: Response,
+    @Param('code') code: string,
+    @Query('email') email?: string,
+  ) {
     try {
-      res.status(HttpStatus.OK).json(await this.couponsService.getCoupon(code));
+      res
+        .status(HttpStatus.OK)
+        .json(await this.couponsService.getCoupon(code, email));
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());

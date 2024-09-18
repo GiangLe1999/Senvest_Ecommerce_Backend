@@ -174,21 +174,15 @@ export class PaymentsService {
     let calculated_discount_value = 0;
 
     if (createPaymentLinkInput?.coupon_code) {
-      const coupon = await this.couponsService.getCouponByCode(
+      const coupon = await this.couponsService.getCouponByCodeAndEmail(
         createPaymentLinkInput?.coupon_code,
+        user_info ? user_info.buyerEmail : '',
       );
 
       if (!coupon) {
         throw new NotFoundException({
           ok: false,
           error: 'Coupon does not exist',
-        });
-      }
-
-      if (coupon?.max_usage_count <= 0) {
-        throw new BadRequestException({
-          ok: false,
-          error: 'Coupon has expired',
         });
       }
 
@@ -367,8 +361,11 @@ export class PaymentsService {
         await payment.save();
 
         if (payment?.coupon_code) {
-          const coupon = await this.couponsService.getCouponByCode(
+          const coupon = await this.couponsService.getCouponByCodeAndEmail(
             payment?.coupon_code,
+            payment?.not_user_info
+              ? payment?.not_user_info?.email
+              : payment?.user_address?.email,
           );
           if (coupon) {
             coupon.usage_count += 1;
