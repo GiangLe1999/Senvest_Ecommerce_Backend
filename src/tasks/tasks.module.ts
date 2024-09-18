@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { TasksService } from './tasks.service';
 import { Coupon, CouponSchema } from '../schemas/coupon.schema';
 import { User, UserSchema } from '../schemas/user.schema';
-import { EmailsModule } from 'src/emails/emails.module';
+import { EmailsModule } from '../emails/emails.module';
 
 @Module({
   imports: [

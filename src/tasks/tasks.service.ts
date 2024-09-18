@@ -9,7 +9,7 @@ import {
 } from '../schemas/coupon.schema';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../schemas/user.schema';
-import { EmailsService } from 'src/emails/emails.service';
+import { EmailsService } from '../emails/emails.service';
 
 @Injectable()
 export class TasksService {
@@ -29,7 +29,7 @@ export class TasksService {
     const month = today.getMonth() + 1;
 
     // Create birthday coupons
-    const formattedDate = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}`;
+    const formattedDate = `${String(day).padStart(2, '0')}${String(month).padStart(2, '0')}`;
 
     const users = await this.usersModel.aggregate([
       {

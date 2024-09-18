@@ -28,27 +28,33 @@ export class CouponsService {
   ): Promise<CouponDocument> {
     const now = new Date();
 
-    const coupon = await this.couponsModel.findOne({
+    const coupons = await this.couponsModel.find({
       code,
       status: 'Active',
       expiry_date: { $gt: now },
       max_usage_count: { $gt: 0 },
     });
 
-    if (coupon?.assigned_to_email) {
-      if (coupon.assigned_to_email !== email) {
-        return undefined;
+    if (coupons.length === 0) {
+      return undefined;
+    } else if (coupons.length === 1) {
+      return coupons[0];
+    } else {
+      for (const coupon of coupons) {
+        if (coupon?.assigned_to_email === email) {
+          return coupon;
+        }
       }
-    }
 
-    return coupon;
+      return undefined;
+    }
   }
 
   async getCoupon(
     code: string,
     email: string,
   ): Promise<{ ok: boolean; coupon: CouponDocument }> {
-    const coupon = await this.getCouponByCodeAndEmail(code, email);
+    const coupon = await this.getCouponByCodeAndEmail(code, email ? email : '');
 
     if (!coupon) {
       throw new NotFoundException({
