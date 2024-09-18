@@ -18,7 +18,7 @@ export class TasksService {
     private config: ConfigService,
   ) {}
 
-  @Cron(CronExpression.EVERY_10_SECONDS)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async createBirthdayCoupons() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -66,6 +66,7 @@ export class TasksService {
     // Update coupon status
     const expiredCoupons = await this.couponsModel.find({
       expiry_date: { $lt: today },
+      status: { $in: [CouponStatusEnum.active, CouponStatusEnum.used] },
     });
 
     if (!expiredCoupons.length) {
