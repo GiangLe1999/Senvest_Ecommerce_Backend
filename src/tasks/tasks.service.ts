@@ -29,7 +29,7 @@ export class TasksService {
     const month = today.getMonth() + 1;
 
     // Create birthday coupons
-    const formattedDate = `${String(day).padStart(2, '0')}${String(month).padStart(2, '0')}`;
+    const formattedDate = `${String(day).padStart(2, '0')}-${String(month).padStart(2, '0')}`;
 
     const users = await this.usersModel.aggregate([
       {
@@ -55,6 +55,15 @@ export class TasksService {
 
       const expiryDate = new Date();
       expiryDate.setHours(23, 59, 59, 999);
+
+      const existingCoupon = await this.couponsModel.findOne({
+        code: couponCode,
+        assigned_to_email: user.email,
+      });
+
+      if (existingCoupon) {
+        continue;
+      }
 
       await this.couponsModel.create({
         code: couponCode,
