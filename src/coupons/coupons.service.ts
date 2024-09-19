@@ -37,7 +37,7 @@ export class CouponsService {
 
     if (coupons.length === 0) {
       return undefined;
-    } else if (coupons.length === 1) {
+    } else if (coupons.length === 1 && !coupons[0]?.assigned_to_email) {
       return coupons[0];
     } else {
       for (const coupon of coupons) {
