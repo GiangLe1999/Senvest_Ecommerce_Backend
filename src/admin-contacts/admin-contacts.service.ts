@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Contact, ContactDocument } from 'src/schemas/contact.schema';
+import { Contact, ContactDocument } from '../schemas/contact.schema';
 
 @Injectable()
 export class AdminContactsService {

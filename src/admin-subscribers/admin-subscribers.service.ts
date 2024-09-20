@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Subscriber, SubscriberDocument } from 'src/schemas/subscriber.schema';
+import { Subscriber, SubscriberDocument } from '../schemas/subscriber.schema';
 
 @Injectable()
 export class AdminSubscribersService {

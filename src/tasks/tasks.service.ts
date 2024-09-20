@@ -21,7 +21,7 @@ export class TasksService {
     private config: ConfigService,
   ) {}
 
-  @Cron('0 10 * * *')
+  @Cron('0 11 * * *')
   async createBirthdayCoupons() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
