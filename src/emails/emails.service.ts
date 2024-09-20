@@ -16,10 +16,14 @@ import {
   SendBirthdayCouponEmailInput,
   SendBirthdayCouponEmailOutput,
 } from './dtos/send-birthday-coupon-email.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class EmailsService {
-  constructor(private readonly mailerService: MailerService) {}
+  constructor(
+    private readonly mailerService: MailerService,
+    private config: ConfigService,
+  ) {}
 
   async sendVerifyEmail(
     sendVerifyEmailInput: SendVerifyEmailInput,
@@ -79,6 +83,13 @@ export class EmailsService {
 
       await this.mailerService.sendMail({
         to: sendSuccessfulPaymentEmailInput.email,
+        subject,
+        template: './successful-payment-email',
+        context: sendSuccessfulPaymentEmailInput,
+      });
+
+      await this.mailerService.sendMail({
+        to: this.config.get('OWNER_EMAIL'),
         subject,
         template: './successful-payment-email',
         context: sendSuccessfulPaymentEmailInput,

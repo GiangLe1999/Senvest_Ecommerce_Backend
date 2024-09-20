@@ -19,7 +19,7 @@ export class ProductsService {
       .find()
       .select('name slug description rating')
       .limit(10)
-      .sort({ createdAt: -1 })
+      .sort({ totalQuantitySold: -1 })
       .populate({
         path: 'variants',
         model: 'Variant',

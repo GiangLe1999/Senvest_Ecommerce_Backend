@@ -27,10 +27,11 @@ export class CouponsController {
     } catch (error) {
       if (error instanceof NotFoundException) {
         res.status(HttpStatus.NOT_FOUND).send(error.getResponse());
+      } else {
+        res
+          .status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .json({ ok: false, error: error.message });
       }
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ ok: false, error: error.message });
     }
   }
 }

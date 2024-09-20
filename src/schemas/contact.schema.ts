@@ -3,7 +3,7 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 export type ContactDocument = HydratedDocument<Contact>;
 
-@Schema()
+@Schema({ timestamps: true })
 export class Contact {
   @Prop({ required: true })
   name: string;

@@ -42,6 +42,8 @@ import { DonationsModule } from './donations/donations.module';
 import { SubscribersModule } from './subscribers/subscribers.module';
 import { CouponsModule } from './coupons/coupons.module';
 import { AdminCouponsModule } from './admin-coupons/admin-coupons.module';
+import { AdminSubscribersModule } from './admin-subscribers/admin-subscribers.module';
+import { AdminContactsModule } from './admin-contacts/admin-contacts.module';
 
 @Module({
   imports: [
@@ -123,6 +125,8 @@ import { AdminCouponsModule } from './admin-coupons/admin-coupons.module';
     SubscribersModule,
     CouponsModule,
     AdminCouponsModule,
+    AdminSubscribersModule,
+    AdminContactsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
