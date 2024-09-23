@@ -1,9 +1,19 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { IsEnum } from 'class-validator';
 import mongoose, { HydratedDocument } from 'mongoose';
 
 export const enum StatusEnum {
   pending = 'pending',
   paid = 'paid',
+  cancelled = 'cancelled',
+  refunded = 'refunded',
+}
+
+export enum AdminStatusEnum {
+  pending = 'pending',
+  processing = 'processing',
+  shipped = 'shipped',
+  delivered = 'delivered',
   cancelled = 'cancelled',
   refunded = 'refunded',
 }
@@ -64,6 +74,10 @@ export class Payment {
 
   @Prop({ required: true })
   status: StatusEnum;
+
+  @Prop({ default: AdminStatusEnum.pending, enum: AdminStatusEnum })
+  @IsEnum(AdminStatusEnum)
+  admin_status: AdminStatusEnum;
 
   @Prop({ required: true })
   amount: number;

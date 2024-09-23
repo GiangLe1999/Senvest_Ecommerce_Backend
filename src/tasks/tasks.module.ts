@@ -4,6 +4,7 @@ import { TasksService } from './tasks.service';
 import { Coupon, CouponSchema } from '../schemas/coupon.schema';
 import { User, UserSchema } from '../schemas/user.schema';
 import { EmailsModule } from '../emails/emails.module';
+import { TasksController } from './tasks.controller';
 
 @Module({
   imports: [
@@ -15,5 +16,6 @@ import { EmailsModule } from '../emails/emails.module';
   ],
   providers: [TasksService],
   exports: [TasksService],
+  controllers: [TasksController],
 })
 export class TasksModule {}

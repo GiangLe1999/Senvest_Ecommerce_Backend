@@ -4,7 +4,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { EmailsService } from '../emails/emails.service';
 import { PusherService } from '../pusher/pusher.service';
-import { Payment, PaymentDocument } from '../schemas/payment.schema';
+import {
+  AdminStatusEnum,
+  Payment,
+  PaymentDocument,
+} from '../schemas/payment.schema';
 
 @Injectable()
 export class AdminPaymentsService {
@@ -18,11 +22,27 @@ export class AdminPaymentsService {
   async getOrders() {
     const orders = await this.paymentsModel
       .find()
-      .populate({
-        path: 'user',
-        model: 'User',
-        select: 'name email',
-      })
+      .populate([
+        {
+          path: 'user',
+          model: 'User',
+          select: 'name email',
+        },
+        {
+          path: 'user_address',
+          model: 'UserAddress',
+        },
+        {
+          path: 'items._id',
+          model: 'Product',
+          select: 'name description',
+        },
+        {
+          path: 'items.variant_id',
+          model: 'Variant',
+          select: 'fragrance images price',
+        },
+      ])
       .sort({ createdAt: -1 })
       .lean();
 
@@ -101,5 +121,25 @@ export class AdminPaymentsService {
     }
 
     return { ok: true, order };
+  }
+
+  async updateProcessingStatus({
+    payment_id,
+    status,
+  }: {
+    payment_id: string;
+    status: AdminStatusEnum;
+  }) {
+    const payment = await this.paymentsModel.findById(payment_id);
+    if (!payment) {
+      throw new NotFoundException({
+        ok: false,
+        error: 'Payment does not exist',
+      });
+    }
+
+    payment.admin_status = status;
+    await payment.save();
+    return { ok: true, payment };
   }
 }

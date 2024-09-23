@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import {
   Coupon,
@@ -21,7 +19,6 @@ export class TasksService {
     private config: ConfigService,
   ) {}
 
-  @Cron('0 11 * * *')
   async createBirthdayCoupons() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -100,5 +97,9 @@ export class TasksService {
       );
       console.log(`Coupon ${coupon.code} marked as expired.`);
     }
+
+    return {
+      ok: true,
+    };
   }
 }
